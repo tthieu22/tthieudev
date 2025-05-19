@@ -1,0 +1,64 @@
+import axios from "axios";
+import { base_url, config } from "../../utils/axiosConfig";
+
+const getProducts = async () => {
+  try {
+    const response = await axios.get(`${base_url}product/`);
+    return response.data;
+  } catch (error) {
+    throw error.response && error.response.data
+      ? error.response.data
+      : error.message;
+  }
+};
+
+const addToWishlist = async (prodId) => {
+  try {
+    const response = await axios.put(
+      `${base_url}product/wishlist/`,
+      {prodId},
+      config
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response && error.response.data
+      ? error.response.data
+      : error.message;
+  }
+};
+const getAproduct = async (prodId) => {
+  try {
+    const response = await axios.get(`${base_url}product/${prodId}/`);
+    return response.data;
+  } catch (error) {
+    throw error.response && error.response.data
+      ? error.response.data
+      : error.message;
+  }
+};
+const getColor = async () => {
+  try {
+    const response = await axios.get(`${base_url}color`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw error.response?.data || error;
+  }
+};
+const getProductsWithMeta = async (params = {}) => {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const response = await axios.get(`${base_url}product/infinite?${query}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const productService = {
+  getProducts,
+  addToWishlist,
+  getAproduct,
+  getColor,
+  getProductsWithMeta,
+};

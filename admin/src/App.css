@@ -1,0 +1,88 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --color-212529: #212529;
+  --color-ffd333: #ffd333;
+  --color-47ad24: #47ad24;
+  --color-e52e2e: #e52e2e;
+  --color-828599: #828599;
+  --color-ed464d: #ed464d;
+  --color-c3d4da: #c3d4da;
+}
+
+.green {
+  color: var(--color-47ad24);
+}
+.red {
+  color: var(--color-e52e2e);
+}
+.quill {
+  background-color: white;
+}
+.form-control {
+  box-shadow: none;
+  border-color: var(--color-c3d4da);
+}
+.title {
+  font-size: 28px;
+  font-family: Roboto !important;
+}
+.dropdown-menu li a {
+  line-height: 30px;
+  width: 100%;
+}
+.error {
+  color: var(--color-e52e2e);
+  font-size: 13px;
+}
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(600px, 1fr)); /* Tự động chia các cột */
+  gap: 20px;
+}
+.grid-container-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Tự động chia các cột */
+  gap: 20px;
+}
+
+.grid-item {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+}
+.login-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(to right, #f8f9fa, #e9ecef);
+  padding: 20px;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 400px;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.error-text {
+  color: red;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+input.form-control:focus {
+  border-color: #ffd333;
+  box-shadow: 0 0 0 0.2rem rgba(255, 211, 51, 0.25);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

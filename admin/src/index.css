@@ -1,0 +1,67 @@
+body {
+  font-family: Roboto, sans-serif;
+}
+.ant-layout {
+  min-height: 100vh;
+}
+.ant-layout-sider {
+  flex: 0 0 250px !important;
+  max-width: 250px !important;
+  min-width: 250px !important;
+  width: 250px !important;
+}
+
+.ant-layout-sider .logo .sm-logo {
+  display: none;
+}
+
+.ant-layout-sider .logo .lg-logo {
+  display: block;
+}
+.ant-layout-sider-collapsed {
+  flex: 0 0 80px !important;
+  max-width: 80px !important;
+  min-width: 80px !important;
+  width: 80px !important;
+}
+.ant-layout-sider-collapsed .logo .lg-logo {
+  display: none;
+}
+.ant-layout-sider-collapsed .logo .sm-logo {
+  display: block;
+}
+.logo {
+  background-color: #ffd333;
+  margin: 0;
+  height: 64px;
+}
+main {
+  /* overflow-y: scroll; */
+  background-color: transparent !important;
+  height: 85vh !important;
+}
+main::-webkit-scrollbar {
+  width: 0px;
+}
+.ant-layout-header h5 {
+  line-height: 30px;
+}
+
+.ant-layout-header p {
+  line-height: 20px;
+}
+
+.ant-layout-header img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+}
+
+.ant-layout-header .badge {
+  top: 15px;
+  right: -5px;
+}
+.ant-layout-content {
+  overflow-y: scroll;
+  height: 20vh;
+}
