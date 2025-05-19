@@ -1,5 +1,5 @@
 require("dotenv").config({ path: "../.env" });
-const fetch = require("node-fetch");
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 async function callGemini(prompt) {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -14,9 +14,7 @@ async function callGemini(prompt) {
     body: JSON.stringify({
       contents: [
         {
-          parts: [
-            { text: prompt }
-          ]
+          parts: [{ text: prompt }]
         }
       ]
     }),
@@ -30,7 +28,6 @@ async function callGemini(prompt) {
 
   const data = await res.json();
 
-  // Kiểm tra và lấy nội dung trả về đúng theo cấu trúc response của Gemini API
   if (!data.candidates || data.candidates.length === 0) {
     throw new Error("Không có kết quả trả về từ Gemini API");
   }
