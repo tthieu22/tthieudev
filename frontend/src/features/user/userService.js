@@ -1,5 +1,5 @@
 import axios from "axios";
-import { base_url, config } from "../../utils/axiosConfig";
+import { base_url, getConfig } from "../../utils/axiosConfig";
 
 //Register
 const register = async (userData) => {
@@ -33,7 +33,7 @@ const login = async (userData) => {
 // Wishlist
 const getaWishlist = async () => {
   try {
-    const response = await axios.get(`${base_url}user/wish-list`, config);
+    const response = await axios.get(`${base_url}user/wish-list`, getConfig());
 
     if (response.data) {
       return response.data;
@@ -46,7 +46,7 @@ const getaWishlist = async () => {
 // Get cart 
 const getCartUser = async () => {
   try {
-      const response = await axios.get(`${base_url}user/cart`, config);
+      const response = await axios.get(`${base_url}user/cart`, getConfig());
       return response.data;
   } catch (error) {
       throw error.response && error.response.data
@@ -57,7 +57,7 @@ const getCartUser = async () => {
 // Add to cart
 const addToCart = async ({ productId, quantity, colorId }) => {
   try {
-      const response = await axios.post(`${base_url}user/cart`, { productId, quantity, colorId }, config);
+      const response = await axios.post(`${base_url}user/cart`, { productId, quantity, colorId }, getConfig());
       return response.data;
   } catch (error) {
       throw error.response && error.response.data
@@ -69,7 +69,7 @@ const addToCart = async ({ productId, quantity, colorId }) => {
 // Update cart item
 const updateCartItemQuantity = async ({ productId, quantity, colorId }) => {
   try {
-      const response = await axios.put(`${base_url}user/update-quantity-product`, { productId, quantity, colorId }, config);
+      const response = await axios.put(`${base_url}user/update-quantity-product`, { productId, quantity, colorId }, getConfig());
       return response.data;
   } catch (error) {
       throw error.response && error.response.data
@@ -79,21 +79,23 @@ const updateCartItemQuantity = async ({ productId, quantity, colorId }) => {
 }
 // Delete cart item
 const deleteCartItem = async ({ productId, colorId }) => {
-  try {
-    console.log(config);
-    
-      const response = await axios.delete(`${base_url}user/delete-product-cart`, { productId, colorId }, config);
-      return response.data;
+  try {  
+    const response = await axios.delete(`${base_url}user/delete-product-cart`, {
+      data: { productId, colorId },
+      ...getConfig()
+    });
+    return response.data;
   } catch (error) {
-      throw error.response && error.response.data
-          ? error.response.data
-          : error.message;
+    throw error.response && error.response.data
+      ? error.response.data
+      : error.message;
   }
-}
+};
+
 // Empty cart
 const emptyCart = async () => {
   try {
-      const response = await axios.delete(`${base_url}user/empty-cart`, config);
+      const response = await axios.delete(`${base_url}user/empty-cart`, getConfig());
       return response.data;
   } catch (error) {
       throw error.response && error.response.data
@@ -105,7 +107,7 @@ const emptyCart = async () => {
 // Apply coupon
 const applyCoupon = async (couponCode) => {
   try {
-      const response = await axios.post(`${base_url}user/cart/applycoupon`, { couponCode }, config);
+      const response = await axios.post(`${base_url}user/cart/applycoupon`, { couponCode }, getConfig());
       return response.data;
   } catch (error) {
       throw error.response && error.response.data
@@ -115,21 +117,44 @@ const applyCoupon = async (couponCode) => {
 }
 const logout = async () => {
   try {
-    const response = await axios.get(`${base_url}user/logout`, config);
+    const response = await axios.get(`${base_url}user/logout`,  getConfig());
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+const updateUser = async (formData) => {
+  try {
+    const response = await axios.put(`${base_url}user/edit-user`, formData, getConfig());
     return response.data;
   } catch (error) {
     throw error.response?.data || error;
   }
 }
 
-const updateUser = async (formData) => {
+// Gửi email quên mật khẩu
+const forgotPassword = async (email) => {
   try {
-    const response = await axios.put(`${base_url}user/edit-user`, formData, config);
+    const response = await axios.post(`${base_url}user/forgot-password-token`, { email });
     return response.data;
   } catch (error) {
     throw error.response?.data || error;
   }
-}
+};
+
+// Reset mật khẩu
+const resetPassword = async (token, newPassword) => {
+  try {
+    const response = await axios.put(`${base_url}user/reset-password/${token}`, {
+      password: newPassword,
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 export const authService = {
   register,
   login,
@@ -142,4 +167,6 @@ export const authService = {
   applyCoupon,
   logout,
   updateUser,
+  forgotPassword,
+  resetPassword
 };

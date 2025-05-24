@@ -19,8 +19,8 @@ const authmiddleware = asyncHandler(async (req, res, next) => {
     throw new Error("There is no token attached to header");
   }
 });
-const isAdmin = asyncHandler(async (req, res, next) => {
-  console.log(req.user);
+
+const isAdmin = asyncHandler(async (req, res, next) => { 
   const { email } = req.user;
   const adminUser = await User.findOne({ email });
   if (adminUser.role !== "admin") {
@@ -29,4 +29,22 @@ const isAdmin = asyncHandler(async (req, res, next) => {
     next();
   }
 });
-module.exports = { authmiddleware, isAdmin };
+
+// optional auth tùy chọn có thể bỏ qua 
+const optionalAuthMiddleware = asyncHandler(async (req, res, next) => {
+  let token;
+  if (req?.headers?.authorization?.startsWith("Bearer")) {
+    token = req.headers.authorization.split(" ")[1];
+    try {
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded?.id);
+        req.user = user;  
+      }
+    } catch (error) {
+      req.user = null;  
+    }
+  } 
+  next();
+});
+module.exports = { authmiddleware, isAdmin, optionalAuthMiddleware };

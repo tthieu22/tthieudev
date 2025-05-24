@@ -5,8 +5,7 @@ import {
   AiOutlineShoppingCart,
   AiOutlineTag,
   AiOutlineShop,
-  AiOutlineNotification,
-  AiOutlineLogout,
+  AiOutlineNotification, 
 } from "react-icons/ai";
 import { MdCategory, MdOutlineColorLens, MdOutlineArticle } from "react-icons/md";
 import { RiCoupon2Fill } from "react-icons/ri";
@@ -29,18 +28,19 @@ const MainLayout = () => {
   const dispatch = useDispatch();
   const location = useLocation();
 
-  const { user } = useSelector((state) => state.auth);
-
-  // Dropdown state for user menu
+  const { loginuser } = useSelector((state) => state.auth );
+ 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout()).unwrap();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
-
-  // Đóng dropdown khi click ra ngoài
+  
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -50,20 +50,15 @@ const MainLayout = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  // Xác định key menu được chọn dựa trên location hiện tại
-  // Lấy phần path đầu tiên sau /admin/ hoặc / để highlight chính xác
+ 
   const getSelectedKey = () => {
-    const path = location.pathname.replace(/^\/admin\/?/, "");
-    // Nếu path rỗng thì chọn "/admin"
+    const path = location.pathname.replace(/^\/admin\/?/, ""); 
     if (!path || path === "") return "/admin";
-
-    // Lấy phần đầu tiên (ví dụ product-list, customer, orders, ...)
+ 
     const firstPart = path.split("/")[0];
     return firstPart;
   };
-
-  // Menu items tách ra biến riêng cho dễ quản lý
+ 
   const menuItems = [
     {
       key: "/admin",
@@ -176,11 +171,6 @@ const MainLayout = () => {
         },
       ],
     },
-    {
-      key: "signout",
-      icon: <AiOutlineLogout />,
-      label: "Đăng Xuất",
-    },
   ];
 
   return (
@@ -195,7 +185,7 @@ const MainLayout = () => {
           className="logo text-center py-4 text-white fs-5 fw-bold"
           style={{ userSelect: "none" }}
         >
-          {collapsed ? "Dev" : "tthieu.dev.02"}
+          {collapsed ? "dev" : "tthieu.dev.02"}
         </div>
         <Menu
           theme="dark"
@@ -293,7 +283,7 @@ const MainLayout = () => {
             >
               <img
                 src={
-                  user?.avatar ||
+                  loginuser?.avatar ||
                   "https://th.bing.com/th/id/OIP.SAkHnK4yt1ed4oz6SzvawAHaEH?w=309&h=180&c=7&r=0&o=5&pid=1.7"
                 }
                 alt="avatar"
@@ -310,19 +300,19 @@ const MainLayout = () => {
                 }}
               />
               <div className="d-flex flex-column" style={{ userSelect: "none", lineHeight: "12px" }}>
-              {user ? (
+              {loginuser ? (
                 <>
                   <h6 
                     className="mb-2" 
                     style={{ userSelect: "none", lineHeight: "12px" }}
                   >
-                    {`${user.firstname} ${user.lastname}`}
+                    {`${loginuser.firstname} ${loginuser.lastname}`}
                   </h6>
                   <small 
                     className="text-muted" 
                     style={{ userSelect: "none", lineHeight: "12px" }}
                   >
-                    {user.email}
+                    {loginuser.email}
                   </small>
                 </>
               ) : (

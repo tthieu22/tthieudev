@@ -1,11 +1,10 @@
-import axios from "axios";
-import { base_url } from "../../utils/base_url";
-import { config } from "../../utils/axiosconfig";
+import axios from "axios"; 
+import { getConfig, base_url } from "../../utils/axiosconfig";
 
 // Function to get categories
 const getCategories = async () => {
   try {
-    const response = await axios.get(`${base_url}category`, config);
+    const response = await axios.get(`${base_url}category`, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -14,7 +13,7 @@ const getCategories = async () => {
 };
 const createCategory = async (catData) => {
   try {
-    const response = await axios.post(`${base_url}category`, catData, config);
+    const response = await axios.post(`${base_url}category`, catData, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -24,7 +23,7 @@ const createCategory = async (catData) => {
 
 const getaCategory = async (id) => {
   try {
-    const response = await axios.get(`${base_url}category/${id}`, config);
+    const response = await axios.get(`${base_url}category/${id}`, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -36,7 +35,7 @@ const updateCategory = async (category) => {
     const response = await axios.put(
       `${base_url}category/${category.id}`,
       { title: category.categoryData.title },
-      config
+      getConfig()
     );
     return response.data;
   } catch (error) {
@@ -47,7 +46,7 @@ const updateCategory = async (category) => {
 
 const deleteaCategory = async (id) => {
   try {
-    const response = await axios.delete(`${base_url}category/${id}`, config);
+    const response = await axios.delete(`${base_url}category/${id}`, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching categories:", error);

@@ -30,8 +30,8 @@ const Blog = () => {
 
   return (
     <>
-      <Meta title={"Các bài viết"} />
-      <BreadCrumb title="Các bài viết" />
+      <Meta title={"Bài viết"} />
+      <BreadCrumb title="Bài viết" />
       <Container class1="blog-wapper home-wapper-2 py-5">
         <div className="row">
           <div className="col-3">

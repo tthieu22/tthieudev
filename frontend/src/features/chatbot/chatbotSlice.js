@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { chatbotService } from "./chatbotServive";
-
+import {handleOrderMessage } from "../../utils/chatbotFunction"
 export const sendMessage = createAsyncThunk(
   "chatbot/send-message",
   async (userInput, thunkAPI) => {
@@ -16,9 +16,10 @@ export const sendMessage = createAsyncThunk(
     }
   }
 );
+
 const initialState = {
   messages: [
-    { id: 'welcome-1', role: 'bot', type: 'text', content: 'Xin chào! Tôi có thể giúp gì cho bạn?' }
+    { id: 'welcome-1', role: 'bot', type: 'text', content: 'Xin chào! Tôi là tthieu.dev botchat. Tôi có thể trả lời tất cả các câu hỏi hoặc tư vấn cho bạn các sản phẩm trong cửa hàng của chúng tôi, tình hình về đơn hàng hay giới thiệu sản phẩm tôi có thể làm được hết. Bạn chỉ cần yêu cầu. Tôi được tạo bởi tthieu.dev.' }
   ],
   loading: false,
   isError: false,
@@ -116,9 +117,20 @@ export const chatbotSlice = createSlice({
                 type: "products",
                 content: data.products ,
               });
-            } 
+            } else if (data.message) { 
+              state.messages.push({
+                id: Date.now() + 4,
+                role: "bot",
+                type: "text",
+                content: data.message,
+              });
+            }
+            break; 
+          case "find_order":
+          case "find_order_near":
+            handleOrderMessage(data, state);
             break;
-
+              
           default:
             state.messages.push({
               id: Date.now() + 1,

@@ -1,6 +1,5 @@
-import axios from "axios";
-import { base_url } from "../../utils/base_url";
-import { config } from "../../utils/axiosconfig";
+import axios from "axios"; 
+import { getConfig, base_url } from "../../utils/axiosconfig";
 
 // Function to get users
 const getBlogCategory = async () => {
@@ -14,7 +13,7 @@ const getBlogCategory = async () => {
 };
 const createBlogCategory = async (catData) => {
   try {
-    const response = await axios.post(`${base_url}blog-category`, catData, config);
+    const response = await axios.post(`${base_url}blog-category`, catData, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -24,7 +23,7 @@ const createBlogCategory = async (catData) => {
 
 const deleteBlogCategory = async (id) => {
   try {
-    const response = await axios.delete(`${base_url}blog-category/${id}`, config);
+    const response = await axios.delete(`${base_url}blog-category/${id}`, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -33,7 +32,7 @@ const deleteBlogCategory = async (id) => {
 }
 const getaBlogCategory = async (id) => {
   try {
-    const response = await axios.get(`${base_url}blog-category/${id}`, config);
+    const response = await axios.get(`${base_url}blog-category/${id}`, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -42,7 +41,7 @@ const getaBlogCategory = async (id) => {
 }
 const updateBlogCategory = async (id, catData) => {
   try {
-    const response = await axios.put(`${base_url}blog-category/${id}`, catData, config);
+    const response = await axios.put(`${base_url}blog-category/${id}`, catData, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);

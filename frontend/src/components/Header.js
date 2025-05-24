@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, Link } from "react-router-dom";
 import { BsSearch, BsBarChart, BsHeart, BsPerson, BsCart } from "react-icons/bs";
-
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 const Header = () => {
   const [user, setUser] = useState(null);
+  const loginuser = useSelector((state) => state.auth.loginuser); 
 
   useEffect(() => {
     try {
@@ -15,14 +17,24 @@ const Header = () => {
         }
       }
     } catch (error) {
-      console.error("Error fetching user info from localStorage:", error);
       setUser(null);
     }
-  }, []);
+    
+  }, [loginuser]);
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const navigate = useNavigate();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim() !== "") {
+      navigate(`/store?q=${encodeURIComponent(searchTerm.trim())}`);
+      setSearchTerm(""); 
+    }
+  };
+  
   return (
-    <>
-      {/* Header Fixed */}
+    <> 
       <div className="position-fixed top-0 start-0 end-0 bg-white shadow-sm z-3" style={{ zIndex: 1030 }}>
         {/* Main Header */}
         <header className="py-3 border-bottom">
@@ -37,17 +49,19 @@ const Header = () => {
               </div>
 
               <div className="col-12 col-md-5">
-                <div className="input-group custom-search">
+                <form onSubmit={handleSubmit} className="input-group custom-search">
                   <input
                     type="text"
                     className="form-control search-input"
-                    placeholder="Tìm kiếm sản phẩm ... "
+                    placeholder="Tìm kiếm sản phẩm ..."
                     aria-label="Tìm kiếm sản phẩm ..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  <span className="input-group-text search-icon">
+                  <button type="submit" className="input-group-text search-icon">
                     <BsSearch />
-                  </span>
-                </div>
+                  </button>
+                </form>
               </div>
 
               <div className="col-12 col-md-5">
@@ -118,7 +132,7 @@ const Header = () => {
                     }
                   >
                     Liên hệ
-                  </NavLink>
+                  </NavLink> 
                 </div>
               </div>
             </div>

@@ -1,6 +1,5 @@
-import axios from "axios";
-import { base_url } from "../../utils/base_url";
-import { config } from "../../utils/axiosconfig";
+import axios from "axios"; 
+import { getConfig, base_url } from "../../utils/axiosconfig";
 
 // Function to get users
 const getColor = async () => {
@@ -14,7 +13,7 @@ const getColor = async () => {
 };
 const createColor = async (colorData) => {
   try {
-    const response = await axios.post(`${base_url}color`, colorData, config);
+    const response = await axios.post(`${base_url}color`, colorData, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -24,7 +23,7 @@ const createColor = async (colorData) => {
 
 const getaColor = async (id) => {
   try {
-    const response = await axios.get(`${base_url}color/${id}`, config);
+    const response = await axios.get(`${base_url}color/${id}`, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -36,7 +35,7 @@ const updateColor = async (color) => {
     const response = await axios.put(
       `${base_url}color/${color.id}`,
       { title: color.colorData.title },
-      config
+      getConfig()
     );
     return response.data;
   } catch (error) {
@@ -47,7 +46,7 @@ const updateColor = async (color) => {
 
 const deleteaColor = async (id) => {
   try {
-    const response = await axios.delete(`${base_url}color/${id}`, config);
+    const response = await axios.delete(`${base_url}color/${id}`, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching categories:", error);

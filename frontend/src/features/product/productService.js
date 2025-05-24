@@ -1,5 +1,5 @@
 import axios from "axios";
-import { base_url, config } from "../../utils/axiosConfig";
+import { base_url, getConfig } from "../../utils/axiosConfig";
 
 const getProducts = async () => {
   try {
@@ -17,7 +17,7 @@ const addToWishlist = async (prodId) => {
     const response = await axios.put(
       `${base_url}product/wishlist/`,
       {prodId},
-      config
+      getConfig()
     );
     return response.data;
   } catch (error) {
@@ -54,11 +54,32 @@ const getProductsWithMeta = async (params = {}) => {
     throw error.response?.data || error.message;
   }
 };
-
+const rating = async (data) => {
+  try {
+    const response = await axios.put(`${base_url}product/ratings`, data, getConfig());
+    return response.data;
+  } catch (error) {
+    throw error.response && error.response.data
+      ? error.response.data
+      : error.message;
+  }
+}
+const getAllCateogoryProduct = async () => {
+  try {
+    const response = await axios.get(`${base_url}category`);
+    return response.data;
+  } catch (error) {
+    throw error.response && error.response.data
+      ? error.response.data
+      : error.message;
+  }
+}
 export const productService = {
   getProducts,
   addToWishlist,
   getAproduct,
   getColor,
   getProductsWithMeta,
+  rating,
+  getAllCateogoryProduct
 };

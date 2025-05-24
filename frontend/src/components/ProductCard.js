@@ -20,18 +20,28 @@ const ProductCard = ({ grid, data }) => {
 
   // Wishlist
   const wishliststate = useSelector((state) => state?.auth?.wishlist?.wishlist || []);
-  const addToWishlist = (id) => {
-    const isInWishlist = wishliststate.some((item) => item._id === id);
-    dispatch(addToWishList(id));
-    setTimeout(() => {
-      dispatch(getAWishList());
+  const addToWishlist = async (id) => {
+    try {
+      const isInWishlist = wishliststate.some((item) => item._id === id);
+      const resultAction = await dispatch(addToWishList(id));
+
+      if (addToWishList.rejected.match(resultAction)) {
+        toast.error("Cần đăng nhập để sử dụng chức năng yêu thích");
+        return;
+      } else { 
+        await dispatch(getAWishList()); 
+      }
+
       if (isInWishlist) {
         toast.info("Đã xóa khỏi danh sách yêu thích");
-      } else if(!isInWishlist) {
+      } else {
         toast.success("Đã thêm vào danh sách yêu thích");
       }
-    }, 300);
+    } catch (error) {
+      toast.error("Có lỗi xảy ra, vui lòng thử lại");
+    }
   };
+
   
   useEffect(() => {
     if(load === false) return;

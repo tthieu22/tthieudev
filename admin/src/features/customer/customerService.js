@@ -1,8 +1,7 @@
-import axios from "axios";
-import { base_url } from "../../utils/base_url";
-import { config } from "../../utils/axiosconfig";
+import axios from "axios"; 
+import { getConfig, base_url } from "../../utils/axiosconfig";
 const getAllUser = async () => {
-  const response = await axios.get(`${base_url}user/all-users`, config);
+  const response = await axios.get(`${base_url}user/all-users`, getConfig());
 
   return response.data;
 };

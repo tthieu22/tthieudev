@@ -1,9 +1,9 @@
 import axios from "axios";
-import { base_url, config } from "../../utils/axiosConfig";
+import { base_url, getConfig } from "../../utils/axiosConfig";
 
 const getOrderDetail = async () => {
     try {
-        const response = await axios.get(`${base_url}order/get-order-detail`, config);
+        const response = await axios.get(`${base_url}order/get-order-detail`, getConfig());
         return response.data;
     } catch (error) {
         throw error.response?.data || error;
@@ -12,7 +12,7 @@ const getOrderDetail = async () => {
 
 const createOrder = async (orderData) => {
     try {
-        const response = await axios.post(`${base_url}user/order/cod`, orderData, config);
+        const response = await axios.post(`${base_url}user/order/cod`, orderData, getConfig());
         return response.data;
     } catch (error) {
         throw error.response?.data || error;
@@ -25,7 +25,7 @@ const createVNPayUrl = async ({ orderCode, amount, orderInfo }) => {
         const response = await axios.post(
             `${base_url}user/order/create-vnpay-url`,
             { orderCode, amount, orderInfo },
-            config
+            getConfig()
         );
         return response.data;
     } catch (error) {
@@ -35,7 +35,7 @@ const createVNPayUrl = async ({ orderCode, amount, orderInfo }) => {
 
 const getOrderNew = async () => {
     try {
-        const response = await axios.get(`${base_url}order/get-order-new`, config);
+        const response = await axios.get(`${base_url}order/get-order-new`, getConfig());
         return response.data;
     } catch (error) {
         throw error.response?.data || error;
@@ -44,7 +44,7 @@ const getOrderNew = async () => {
 
 const cancelOrder = async (orderId) => {
     try {
-        const response = await axios.delete(`${base_url}order/cancel-order/${orderId}`, config);
+        const response = await axios.post(`${base_url}user/order/cancel`,{orderId}, getConfig());
         return response.data;
     } catch (error) {
         throw error.response?.data || error;
@@ -52,10 +52,22 @@ const cancelOrder = async (orderId) => {
 }
 const getOrderByCode = async (orderCode) => {
     try {
-        const response = await axios.get(`${base_url}user/order/code/${orderCode}`, config);
+        const response = await axios.get(`${base_url}user/order/code/${orderCode}`, getConfig());
         return response.data;
     } catch (error) {
         throw error.response?.data || error;
     }
 }
-export const orderService = { getOrderDetail, createOrder, getOrderNew , cancelOrder, createVNPayUrl,getOrderByCode};
+const getAllOrder = async ({ page, limit, search, status }) => {
+    try {
+      const response = await axios.get(`${base_url}user/order/user-orders`, {
+        params: { page, limit, search, status },
+        ...getConfig()
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+  
+export const orderService = { getOrderDetail, createOrder, getOrderNew , cancelOrder, createVNPayUrl,getOrderByCode ,getAllOrder};

@@ -61,12 +61,12 @@ const CompareProduct = () => {
       >
         <div className="row g-4">
           {compareList.length === 0 ? (
-            <div
-              className="text-center w-100 py-5"
-              style={{ fontSize: "1.25rem", color: "#666" }}
-            >
-              Không có sản phẩm để so sánh
-            </div>
+            
+            <div className="py-3">
+                  <div className="loading-spinner d-flex align-items-center justify-content-center" style={{textAlign: "center", padding: "50px" , height: "70vh"}}>
+                    <h5>Không có sản phẩm để so sánh.</h5>
+                </div>
+              </div>
           ) : (
             compareList.map((item) => (
               <div className="col-md-3 col-sm-6" key={item._id}>

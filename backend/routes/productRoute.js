@@ -11,7 +11,7 @@ const {
   uploadImages,
   deleteImagesProduct,
 } = require("../controller/productCtrl");
-const { isAdmin, authmiddleware } = require("../middlewares/authmiddleware");
+const { isAdmin, authmiddleware ,optionalAuthMiddleware} = require("../middlewares/authmiddleware");
 const {handleChat} = require("../controller/chatbot");
 const {
   uploadPhoto,
@@ -37,6 +37,6 @@ router.put(
   uploadImages
 );
 router.delete("/delete-img/:id", authmiddleware, isAdmin, deleteImagesProduct);
-router.post("/chat", handleChat);
+router.post("/chat", optionalAuthMiddleware, handleChat);
 
 module.exports = router;

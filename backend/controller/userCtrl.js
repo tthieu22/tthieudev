@@ -18,6 +18,12 @@ const { v4: uuidv4 } = require('uuid');
 const MomoConfig = require('../config/momoConfig');
 require("dotenv").config({ path: "../.env" });
 
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+  maxAge: 72 * 60 * 60 * 1000,
+};
 
 const createUser = asyncHandler(async (req, res) => {
   const email = req.body.email;
@@ -44,10 +50,7 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
       },
       { new: true }
     );
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      maxAge: 72 * 60 * 60 * 1000,
-    });
+    res.cookie("refreshToken", refreshToken, cookieOptions);
     res.json({
       _id: findUser?._id,
       firstname: findUser?.firstname,
@@ -77,10 +80,8 @@ const loginAdminCtrl = asyncHandler(async (req, res) => {
       },
       { new: true }
     );
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      maxAge: 72 * 60 * 60 * 1000,
-    });
+    res.cookie("refreshToken", refreshToken, cookieOptions);
+
     res.json({
       _id: findAdmin?._id,
       firstname: findAdmin?.firstname,
@@ -116,27 +117,20 @@ const handleRefreshToken = asyncHandler(async (req, res) => {
 const logout = asyncHandler(async (req, res) => {
   const cookie = req.cookies;
   if (!cookie?.refreshToken) {
-    throw new Error("No refresh token in cookies");
+    res.clearCookie("refreshToken", cookieOptions);
+    return res.sendStatus(204);
   }
   const refreshToken = cookie.refreshToken;
   const user = await User.findOne({ refreshToken });
   if (!user) {
-    res.clearCookie("refreshToken", {
-      httpOnly: true,
-      secure: true,
-    });
-    return res.sendStatus(204); // forbidden
+    res.clearCookie("refreshToken", cookieOptions);
+    return res.sendStatus(204);
   }
-  await User.findByIdAndUpdate(user._id, {
-    // await User.findByIdAndUpdate(, refreshToken{
-    refreshToken: "",
-  });
-  res.clearCookie("refreshToken", {
-    httpOnly: true,
-    secure: true,
-  });
-  res.sendStatus(204); // forbidden
+  await User.findByIdAndUpdate(user._id, { refreshToken: "" });
+  res.clearCookie("refreshToken", cookieOptions);
+  res.sendStatus(204);
 });
+
 // update a user
 const updateaUser = asyncHandler(async (req, res) => {
   const { _id } = req.user;
@@ -283,24 +277,49 @@ const updatePassword = asyncHandler(async (req, res) => {
 const forgotPasswordToken = asyncHandler(async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
-  if (!user) throw new Error("Không tìm thấy người dùng với email này");
+  if (!user) {
+    res.status(404);
+    throw new Error("Không tìm thấy người dùng với địa chỉ email này.");
+  }
 
   try {
-    const resetToken = await user.createPasswordResetToken(); // tạo token
+    const resetToken = await user.createPasswordResetToken();
     await user.save();
 
-    const resetURL = `http://localhost:3000/reset-password/${resetToken}`; // frontend URL
-    const data = {
+    const resetURL = `${process.env.URL_MAIL}reset-password/${resetToken}`;
+
+    const emailData = {
       to: email,
-      text: "Hey User",
       subject: "Liên kết đặt lại mật khẩu",
-      htm: `<p>Chào bạn,</p><p>Nhấp vào liên kết để đặt lại mật khẩu: <a href="${resetURL}">Tại đây</a></p><p>Liên kết này chỉ có hiệu lực trong 10 phút.</p>`,
+      text: "Bạn đã yêu cầu đặt lại mật khẩu.",
+      htm: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2>Yêu cầu đặt lại mật khẩu</h2>
+          <p>Xin chào <strong>${user.firstname || "người dùng"}</strong>,</p>
+          <p>Bạn vừa yêu cầu đặt lại mật khẩu. Nhấn vào liên kết bên dưới để tiếp tục:</p>
+          <p>
+            <a href="${resetURL}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+              Đặt lại mật khẩu
+            </a>
+          </p>
+          <p>Liên kết này sẽ hết hạn sau <strong>10 phút</strong>.</p>
+          <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.</p>
+          <br />
+          <p>Trân trọng,</p>
+          <p><strong>Đội ngũ hỗ trợ</strong></p>
+        </div>
+      `,
     };
 
-    await sendEmail(data);
-    res.json({ success: true, message: "Đã gửi email đặt lại mật khẩu" });
+    await sendEmail(emailData);
+
+    res.status(200).json({
+      success: true,
+      message: "Chúng tôi đã gửi một email đặt lại mật khẩu đến địa chỉ của bạn.",
+    });
   } catch (error) {
-    throw new Error("Gửi email thất bại: " + error.message);
+    res.status(500);
+    throw new Error("Không thể gửi email. Vui lòng thử lại sau.");
   }
 });
 
@@ -325,7 +344,7 @@ const resetPassword = asyncHandler(async (req, res) => {
   await user.save();
   res.json({ success: true, message: "Mật khẩu đã được cập nhật thành công" });
 });
-
+// Lấy danh sách wishList
 const getWishList = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   try {
@@ -420,6 +439,7 @@ const addToCart = asyncHandler(async (req, res) => {
     cart,
   });
 });
+
 // Xóa 1 sản phẩm trong giỏ hàng
 const removeFromCart = asyncHandler(async (req, res) => {
   const { productId, colorId } = req.body;
@@ -456,6 +476,7 @@ const removeFromCart = asyncHandler(async (req, res) => {
   });
 });
 
+// Update cart item quantity
 const updateCartItemQuantity = asyncHandler(async (req, res) => {
   const { productId, colorId, quantity } = req.body;
   const { _id } = req.user;
@@ -496,6 +517,7 @@ const updateCartItemQuantity = asyncHandler(async (req, res) => {
     cart,
   });
 });
+
 // Xóa giỏ hàng
 const emptyCart = asyncHandler(async (req, res) => {
   const { _id } = req.user;
@@ -555,6 +577,7 @@ const applyCouponToCart = asyncHandler(async (req, res) => {
     cart,
   });
 });
+
 // Xóa mã giảm giá khỏi giỏ hàng
 const removeCouponFromCart = asyncHandler(async (req, res) => {
   const { _id } = req.user;
@@ -578,20 +601,45 @@ const removeCouponFromCart = asyncHandler(async (req, res) => {
   });
 });
 
-// Get list order user (admin)
-const getUserOrders = asyncHandler(async (req, res) => { 
+// Get list order user  
+const getUserOrders = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   validateMongodbId(_id);
+
+  const { page = 1, limit = 10, search = "", status } = req.query;
+
   try {
-    const orders = await Order.find({ orderBy: _id })
+    const query = {
+      orderBy: _id,
+    };
+
+    if (search) {
+      query.orderCode = { $regex: search, $options: "i" };
+    }
+
+    if (status) {
+      query.orderStatus = status;
+    }
+
+    const totalOrders = await Order.countDocuments(query);
+
+    const orders = await Order.find(query)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
       .populate("products.product")
       .populate("products.color")
       .populate("orderBy")
       .populate("coupon");
 
-    res.json(orders);
+    res.json({
+      totalOrders,
+      currentPage: Number(page),
+      totalPages: Math.ceil(totalOrders / limit),
+      orders,
+    });
   } catch (error) {
-    throw new Error(error);
+    throw new Error(error.message);
   }
 });
 
@@ -1013,7 +1061,7 @@ const cancelOrder = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Không thể hủy đơn hàng đã thanh toán" });
   }
 
-  order.orderStatus = "Canceled";
+  order.orderStatus = "Cancelled";
   await order.save();
 
   res.json({ success: true, message: "Đơn hàng đã được hủy" });

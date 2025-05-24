@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import BreadCrumb from "../components/BreadCrumb";
 import Meta from "../components/Meta";
 import { useNavigate } from "react-router-dom";
-
+import {logout} from "../features/user/userSlice";
 const AccountPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -54,97 +54,110 @@ const AccountPage = () => {
       })
       .catch(() => toast.error("Có lỗi xảy ra!"));
   };
-
+  const handleLogout = async () => {
+    await dispatch(logout());         
+    navigate("/");
+    window.location.reload();          
+  };
+  
   return (
     <>
       <Meta title="Thông tin tài khoản" />
       <BreadCrumb title="Thông tin tài khoản" />
-      <div className="container p-5 bg-white rounded shadow mb-5" style={ { border: "1px solid #ddd" } }>
-        <h3 className="text-center mb-4">Thông tin tài khoản</h3>
-        <div className="d-flex flex-wrap gap-4 justify-content-center">
-          <div className="card-body p-4 border rounded" style={{ maxWidth: 500, flex: "1 1 400px" }}>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label className="form-label">Họ</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="firstname"
-                  value={formData.firstname}
-                  onChange={handleChange}
-                  placeholder="Nhập họ"
-                  required
-                />
-              </div>
+      <div className="bg-account">
+        <div className="container p-5 bg-white rounded shadow mb-5" style={ { border: "1px solid #ddd" } }>
+          <h3 className="text-center mb-4">Thông tin tài khoản</h3>
+          <div className="d-flex flex-wrap gap-4 justify-content-center">
+            <div className="card-body p-4 border rounded" style={{ maxWidth: 500, flex: "1 1 400px" }}>
+              <form onSubmit={handleSubmit}>
+                <div className="mb-3">
+                  <label className="form-label">Họ</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="firstname"
+                    value={formData.firstname}
+                    onChange={handleChange}
+                    placeholder="Nhập họ"
+                    required
+                  />
+                </div>
 
-              <div className="mb-3">
-                <label className="form-label">Tên</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="lastname"
-                  value={formData.lastname}
-                  onChange={handleChange}
-                  placeholder="Nhập tên"
-                  required
-                />
-              </div>
+                <div className="mb-3">
+                  <label className="form-label">Tên</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="lastname"
+                    value={formData.lastname}
+                    onChange={handleChange}
+                    placeholder="Nhập tên"
+                    required
+                  />
+                </div>
 
-              <div className="mb-3">
-                <label className="form-label">Email</label>
-                <input
-                  type="email"
-                  className="form-control"
-                  name="email"
-                  value={formData.email}
-                  disabled
-                />
-              </div>
+                <div className="mb-3">
+                  <label className="form-label">Email</label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    name="email"
+                    value={formData.email}
+                    disabled
+                  />
+                </div>
 
-              <div className="mb-3">
-                <label className="form-label">Số điện thoại</label>
-                <input
-                  type="tel"
-                  className="form-control"
-                  name="mobile"
-                  value={formData.mobile}
-                  onChange={handleChange}
-                  placeholder="Nhập số điện thoại"
-                  pattern="[0-9+()-\s]*"
-                />
-              </div>
+                <div className="mb-3">
+                  <label className="form-label">Số điện thoại</label>
+                  <input
+                    type="tel"
+                    className="form-control"
+                    name="mobile"
+                    value={formData.mobile}
+                    onChange={handleChange}
+                    placeholder="Nhập số điện thoại"
+                    pattern="[0-9+()-\s]*"
+                  />
+                </div>
 
-              <div className="d-grid">
-                <button className="btn button" type="submit">
-                  Cập nhật thông tin
-                </button>
-              </div>
-            </form>
-          </div>
+                <div className="d-grid">
+                  <button className="btn button" type="submit">
+                    Cập nhật thông tin
+                  </button>
+                </div>
+              </form>
+            </div>
 
-          <aside className="text-secondary " style={{ maxWidth: 400, flex: "1 1 300px" }}>
-            <p style={{ fontSize: "0.9rem", lineHeight: 1.5, color: "#555" }}>
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Praesentium consequatur consectetur exercitationem ab unde eligendi dolore, quas soluta sint omnis, aliquid ipsa quasi labore expedita eveniet saepe numquam error sed.&nbsp;
-              <a href="/" target="_blank" rel="noopener noreferrer" className="text-primary">
+            <aside className="text-secondary d-flex flex-column align-items-center justify-content-center" style={{ maxWidth: "100%", flex: "1 1 300px" }}>
+              <a href="https://www.facebook.com/tt.hieu.22" target="_blank" rel="noopener noreferrer" className="text-dark fw-bold fs-2">
                 tthieu.dev
               </a>.
-            </p>
-
-            <div className="d-flex justify-content-center gap-3 mt-4">
-              <button
-                className="btn button"
-                onClick={() => navigate("/")}
-              >
-                View Home
-              </button>
-              <button
-                className="btn button"
-                onClick={() => navigate("/store")}
-              >
-                View Store
-              </button>
-            </div>
-          </aside>
+              <p style={{ fontSize: "0.9rem", lineHeight: 1.5, color: "#555", textAlign: "center"  }}>
+                Chào mừng bạn đến với trang thông tin tài khoản của mình! Tại đây, bạn có thể xem và cập nhật các thông tin cá nhân, thay đổi mật khẩu, quản lý đơn hàng và theo dõi các hoạt động liên quan đến tài khoản của bạn một cách dễ dàng và bảo mật.&nbsp;
+              </p> 
+              <div className="d-flex justify-content-center gap-3 mt-4">
+                <button
+                  className="btn button"
+                  onClick={() => navigate("/")}
+                >
+                  Trang chủ
+                </button>
+                <button
+                  className="btn button"
+                  onClick={() => navigate("/orders")}
+                >
+                  Đơn hàng
+                </button>
+                
+                <button
+                  className="btn button"
+                  onClick={handleLogout}
+                >
+                  Đăng xuất
+                </button>
+              </div>
+            </aside>
+          </div>
         </div>
       </div>
     </>

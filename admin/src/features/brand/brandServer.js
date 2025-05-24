@@ -1,6 +1,5 @@
-import axios from "axios";
-import { base_url } from "../../utils/base_url";
-import { config } from "../../utils/axiosconfig";
+import axios from "axios"; 
+import { getConfig, base_url } from "../../utils/axiosconfig";
 // Function to get users
 const getBrand = async () => {
   try {
@@ -13,7 +12,7 @@ const getBrand = async () => {
 };
 const createBrand = async (brand) => {
   try {
-    const response = await axios.post(`${base_url}brand`, brand, config);
+    const response = await axios.post(`${base_url}brand`, brand, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -34,7 +33,7 @@ const updateBrand = async (brand) => {
     const response = await axios.put(
       `${base_url}brand/${brand.id}`,
       { title: brand.brandData.title },
-      config
+      getConfig()
     );
     return response.data;
   } catch (error) {
@@ -45,7 +44,7 @@ const updateBrand = async (brand) => {
 
 const deleteaBrand = async (id) => {
   try {
-    const response = await axios.delete(`${base_url}brand/${id}`, config);
+    const response = await axios.delete(`${base_url}brand/${id}`, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);

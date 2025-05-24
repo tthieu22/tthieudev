@@ -7,6 +7,7 @@ import contactReducer from "../features/contact/contactSlice";
 import compareReducer from "../features/compare/compareSlice";
 import orderReducer from "../features/order/orderSlice";
 import chatbotReducer from "../features/chatbot/chatbotSlice";
+import enquiryReducer from "../features/enquirry/enquirySlice";
 
 export const store = configureStore({
   reducer: {
@@ -18,5 +19,6 @@ export const store = configureStore({
     compare: compareReducer,
     order: orderReducer,
     chatbot: chatbotReducer,
+    enquiry: enquiryReducer
   },
 });

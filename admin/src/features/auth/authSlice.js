@@ -1,14 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authService from "./authService";
-
-const getUserfromLocalStorage = localStorage.getItem("user")
-  ? JSON.parse(localStorage.getItem("user"))
-  : null;
-
+import { getTokenFromLocalStorage, getUserFromLocalStorage } from "../../utils/axiosconfig";
 const initialState = {
-  user: getUserfromLocalStorage,
+  user: getTokenFromLocalStorage(),
   orders: [],
   users: [],       
+  loginuser: getUserFromLocalStorage(),
   singleUser: null, 
   isError: false,
   isLoading: false,
@@ -162,9 +159,20 @@ export const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.isError = false;
         state.isSuccess = true;
+        state.message = action.payload?.message;
         state.user = action.payload;
         state.message = "Login successful";
+        if (state.message === "Error") {
+          localStorage.removeItem("customer");
+          localStorage.removeItem("token"); 
+        } else {
+          state.loginuser = action.payload;
+          if (state.isSuccess === true) {
+            localStorage.setItem("token", action.payload?.token);
+          }
+        }
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
@@ -176,6 +184,8 @@ export const authSlice = createSlice({
       // logout
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
+        localStorage.removeItem("customer");
+        localStorage.removeItem("token"); 
         state.message = "Logged out successfully";
       })
 

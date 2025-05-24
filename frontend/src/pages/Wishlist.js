@@ -69,25 +69,30 @@ const Wishlist = () => {
                       <img
                         src={item.images[0].url}
                         alt={item.title}
-                        className="w-100 img-fluid"
-                        style={{ objectFit: "cover", height: "220px" }}
+                        className="w-100 "
+                        style={{ objectFit: "cover", maxHeight: "300px" }}
                       />
                     </div>
                     <Link
                       to={`/product/${item._id}`}
                       className="px-3 py-3 bg-white d-block text-decoration-none"
                     >
-                      <h5 className="title text-truncate" title={item.title}>
+                      <h5 className="title text-truncate fw-bold" title={item.title}>
                         {item.title}
                       </h5>
-                      <h6 className="price text-danger">$ {item.price}</h6>
+                      <h6 className="price text-danger"> {item.price
+                        ? Number(item.price).toLocaleString("vi-VN") + " ₫"
+                        : "Đang cập nhật giá"}
+                      </h6>
                     </Link>
                   </div>
                 </div>
               ))
-            ) : (
-              <div className="col-12 text-center">
-                <p>Không có sản phẩm nào trong danh sách yêu thích.</p>
+            ) : ( 
+              <div className="py-3">
+                  <div className="loading-spinner d-flex align-items-center justify-content-center" style={{textAlign: "center", padding: "50px" , height: "70vh"}}>
+                    <h5>Không có sản phẩm nào yêu thích</h5>
+                </div>
               </div>
             )}
           </div>

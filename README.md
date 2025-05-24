@@ -1,9 +1,75 @@
 
-# Dự án Digital
+# Dự án tthieu.dev
+
+# Giới thiệu Dự án Demo
+
+Kính chào anh/chị HR,
+
+Em xin gửi đến anh/chị sản phẩm demo do em tự học, nghiên cứu và phát triển hoàn toàn độc lập nhằm thể hiện năng lực và kỹ năng phát triển web Fullstack của mình. Em rất trân trọng thời gian quý báu của anh/chị khi xem CV và trải nghiệm sản phẩm này.
+
+## Giới thiệu chung
+
+Dự án demo là hệ thống quản lý sản phẩm và đơn hàng tối ưu hóa quy trình bán hàng trực tuyến, từ thêm sản phẩm, quản lý danh mục đến xử lý thanh toán. Hệ thống sử dụng JWT đảm bảo bảo mật xác thực người dùng, đồng thời tích hợp chatbot thông minh giúp trả lời tự động các câu hỏi thường gặp, giảm đến 30% lượng yêu cầu hỗ trợ thủ công, nâng cao trải nghiệm và tiết kiệm thời gian vận hành.
+
+## Tính năng quản trị (Admin)
+
+- Quản lý sản phẩm: thêm, sửa, xoá với đầy đủ thông tin chi tiết (tên, mô tả, giá, hình ảnh).
+- Quản lý danh mục sản phẩm, bài viết/blog, thương hiệu, người dùng, danh sách yêu thích.
+- Quản lý đơn hàng với các trạng thái cập nhật theo quy trình vận hành.
+- Các chức năng hỗ trợ khác: giảm giá, xử lý yêu cầu liên hệ, bình luận, đánh giá.
+- Xác thực người dùng, quên/mật khẩu và đặt lại mật khẩu sử dụng token JWT bảo mật.
+- Thanh toán demo qua VNPay với hướng dẫn thử nghiệm chi tiết.
+
+Giao diện admin hiện còn đơn giản, một số tính năng chưa hoàn thiện, nhưng các chức năng cốt lõi đã hoàn thành để vận hành hệ thống hiệu quả.
+
+## Tính năng frontend dành cho người dùng
+
+- Hiển thị sản phẩm theo danh mục, hỗ trợ lọc và tìm kiếm nhanh.
+- Giỏ hàng thêm, sửa, xoá sản phẩm dễ dàng.
+- Thanh toán demo qua VNPay với hướng dẫn chi tiết.
+- Quản lý tài khoản bảo mật bằng JWT, hỗ trợ quên/mật khẩu qua email.
+- Bài viết, bình luận, đánh giá sản phẩm.
+- Chatbot đa kịch bản hỗ trợ trò chuyện, tư vấn sản phẩm, chính sách, tra cứu đơn hàng.
+
+## Kiến trúc & Công nghệ sử dụng
+
+**Frontend:** React.js, Redux Toolkit, React Router, CSS/SCSS, Axios.  
+**Backend:** Node.js + Express.js (MVC), MongoDB Atlas, JWT, hệ thống mailer.  
+**Triển khai:** Docker, DockerHub, AWS EC2, SSL/HTTPS, domain riêng.  
+**Công cụ hỗ trợ:** Git/GitHub, Postman.
+
+## Điểm nhấn kỹ thuật nâng cao
+
+- Bảo mật: JWT với refresh token, chống CSRF, XSS, reset mật khẩu an toàn.
+- Kiến trúc mở rộng: mô hình MVC chuẩn, module hóa quản lý sản phẩm, đơn hàng, người dùng.
+- Hiệu suất: tối ưu Redux, caching API, lazy loading, code splitting.
+- DevOps: Container hóa, pipeline CI/CD cơ bản, SSL/HTTPS bảo mật.
+- Chatbot AI đa kịch bản giúp giảm 30% yêu cầu hỗ trợ thủ công.
+
+## Kết quả & Bài học
+
+Dự án giúp em nâng cao kỹ năng phát triển API RESTful, quản lý trạng thái phức tạp, triển khai thực tế trên AWS với Docker, quản lý mã nguồn Git, bảo mật ứng dụng và làm việc nhóm hiệu quả. Dù còn một số điểm chưa hoàn thiện, em rất mong nhận được góp ý từ anh/chị để hoàn thiện và phát triển thành giải pháp thương mại chuyên nghiệp.
+
+## Kế hoạch phát triển mở rộng
+
+- Báo cáo, thống kê doanh thu trực quan (ChartJS/Recharts).
+- Xác thực hai lớp (2FA), phân quyền chi tiết (RBAC).
+- Tối ưu giao diện, SEO frontend.
+- Mở rộng chatbot AI nâng cao.
+
+## Link GitHub source code
+
+[https://github.com/tthieu22/tthieudev.git](https://github.com/tthieu22/tthieudev.git)  
+
+Em rất sẵn lòng trao đổi thêm hoặc hỗ trợ trải nghiệm trực tiếp sản phẩm khi anh/chị cần. Xin cảm ơn anh/chị đã dành thời gian đọc và xem xét.
+
+
+
+
 
 ## Tổng quan dự án
 
-Dự án Digital là một hệ thống đa thành phần, bao gồm:
+Dự án tthieu.dev là một hệ thống đa thành phần, bao gồm:
 
 - **Frontend**: Giao diện người dùng cuối (client) dành cho khách hàng sử dụng dịch vụ.
 - **Admin**: Giao diện quản trị dành cho quản lý và nhân viên admin.
@@ -168,7 +234,7 @@ VNPAY_RETURN_URL=https://yourdomain.com/vnpay_return
 VNPAY_PAY_URL=https://pay.vnpay.vn/vpcpay.html
 GEMINI_API_KEY=your_gemini_api_key
 
-# Nếu sử dụng ví Momo, bật và cấu hình:
+<!-- Chưa tích hợp  -->
 # MOMO_PARTNER_CODE=your_partner_code
 # MOMO_ACCESS_KEY=your_access_key
 # MOMO_SECRET_KEY=your_secret_key
@@ -197,11 +263,10 @@ GEMINI_API_KEY=your_gemini_api_key
 Nếu gặp vấn đề hoặc cần hỗ trợ, vui lòng liên hệ:
 
 - **SĐT**: 0563650708  
-- Hoặc tạo [issue trên repository](link repository của bạn) để được hỗ trợ kịp thời.
 
 
 <!-- NOTE QUÁ TRÌNH THỰC HIỆN  -->
-
+<!-- 
 ### fontend ####
 npx create-react-app digital-fe --template redux
 npm i react-icons
@@ -284,7 +349,7 @@ config ==> jwtToken ==> middlewares -> authmiddleware -> athRoute(      U : rout
 router.put("/block-user/:id", authmiddleware, isAdmin, blockUser);
 ** verified user id 
 Create folder Utils -> validateMonfgodbID 
-** Phan tich cookie --> refreshToken 3day 72*60*60*1000
+** Phan tich cookie -> refreshToken 3day 72*60*60*1000
 npm i cookie-parser
 -> handlerRefreshToken 
 ** Log out  
@@ -362,4 +427,4 @@ Yup use Warning
 use Select in antd
 Notice show 
 npm install --save react-toastify
-
+ -->

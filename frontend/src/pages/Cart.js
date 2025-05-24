@@ -5,149 +5,207 @@ import { Link } from "react-router-dom";
 import { MdDelete } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import Container from "../components/Container";
-import { getCartUser, updateCartItemQuantity, deleteCartItem ,resetStatus } from "../features/user/userSlice";
+import {
+  getCartUser,
+  updateCartItemQuantity,
+  deleteCartItem,
+  resetStatus,
+  emptyCartAction
+} from "../features/user/userSlice";
 import { toast } from "react-toastify";
+import { FaSpinner } from "react-icons/fa";
 
 const useDebounce = (callback, delay = 500) => {
   const timeoutRef = useRef({});
 
-  const debouncedFunction = useCallback((id, ...args) => {
-    if (timeoutRef.current[id]) {
-      clearTimeout(timeoutRef.current[id]);
-    }
-    timeoutRef.current[id] = setTimeout(() => {
-      callback(id, ...args);
-    }, delay);
-  }, [callback, delay]);
+  const debouncedFunction = useCallback(
+    (id, ...args) => {
+      if (timeoutRef.current[id]) {
+        clearTimeout(timeoutRef.current[id]);
+      }
+      timeoutRef.current[id] = setTimeout(() => {
+        callback(id, ...args);
+      }, delay);
+    },
+    [callback, delay]
+  );
 
   return debouncedFunction;
 };
 
 const Cart = () => {
   const dispatch = useDispatch();
-  const [loadCart, setLoadCart] = useState(true);
   const [quantities, setQuantities] = useState({});
-  
+  const [loading, setLoading] = useState(true);
+
   const getCart = useSelector((state) => state.auth.getCart);
-  const items = useMemo(() => Array.isArray(getCart?.items) ? getCart.items : [], [getCart?.items]);
-  const { isSuccess, updateQuantityItem, removeItem, emptyCart, } = useSelector((state) => state.auth);
+  const { isSuccess, updateQuantityItem, removeItem, emptyCart } = useSelector(
+    (state) => state.auth
+  );
+
+  const items = useMemo(() => {
+    return Array.isArray(getCart?.items)
+      ? getCart.items.filter((item) => item.product && item.color)
+      : [];
+  }, [getCart?.items]);
+
+  useEffect(() => {
+    dispatch(getCartUser()).finally(() => setLoading(false));
+  }, [dispatch]);
+
   useEffect(() => {
     if (isSuccess && updateQuantityItem) {
       toast.success("Cập nhật số lượng thành công");
       dispatch(resetStatus());
     }
-  
     if (isSuccess && removeItem) {
       toast.success("Xóa sản phẩm thành công");
       dispatch(resetStatus());
     }
-  
     if (isSuccess && emptyCart) {
       toast.success("Đã xóa toàn bộ giỏ hàng");
       dispatch(resetStatus());
     }
   }, [isSuccess, updateQuantityItem, removeItem, emptyCart, dispatch]);
-  
-  useEffect(() => {
-    if (loadCart) {
-      dispatch(getCartUser());
-      setLoadCart(false);
-    }
-  }, [dispatch, loadCart]);
 
   useEffect(() => {
     const initialQty = {};
     items.forEach((item) => {
-      initialQty[item.product._id] = item.quantity;
+      initialQty[`${item.product._id}-${item.color._id}`] = item.quantity;
     });
     setQuantities(initialQty);
   }, [items]);
 
   const handleQtyChange = useDebounce((productId, newQty, colorId) => {
-    dispatch(updateCartItemQuantity({ productId: productId, quantity: newQty, colorId: colorId }));
-    setLoadCart(true);
+    dispatch(updateCartItemQuantity({ productId, quantity: newQty, colorId })).then(() => {
+      dispatch(getCartUser());
+    });
   }, 500);
-
-  const handleDeleteItem = useDebounce((productId, colorId) => {
-    dispatch(deleteCartItem({ productId: productId, colorId: colorId }));
-    setLoadCart(true); 
-    console.log(productId, colorId);
+  const handleDeleteItem = useDebounce(async (productId, colorId) => {
+    try {
+      setLoading(true);
+      await dispatch(deleteCartItem({ productId, colorId }));
+      await dispatch(getCartUser());
+    } finally {
+      setLoading(false);
+    }
   }, 500);
-
+  
+  const handleEmptyCart = async () => {
+    try {
+      setLoading(true);
+      await dispatch(emptyCartAction());
+      await dispatch(getCartUser());
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   const onQuantityChange = (productId, colorId, e) => {
     const newQty = Math.max(1, parseInt(e.target.value) || 1);
-    const selectedItem = items.find((item) => item.product._id === productId && item.color._id === colorId);
-
+    const selectedItem = items.find(
+      (item) => item.product._id === productId && item.color._id === colorId
+    );
     if (selectedItem) {
       const availableQty = selectedItem.product.quantity - selectedItem.product.sold;
-      const updatedQty = Math.min(Math.max(newQty, 1), availableQty); 
+      const updatedQty = Math.min(newQty, availableQty);
       setQuantities((prev) => ({
         ...prev,
         [`${productId}-${colorId}`]: updatedQty,
       }));
-
-      handleQtyChange(productId, updatedQty , colorId);
+      handleQtyChange(productId, updatedQty, colorId);
     }
   };
 
+  if (loading) {
+    return (
+      <>  
+        <Meta title="Giỏ hàng" />
+        <BreadCrumb title="Giỏ hàng" />
+        <div className="loading-spinner d-flex align-items-center justify-content-center" style={{textAlign: "center", padding: "50px" , height: "100vh" ,backgroundColor:" var(--color-f5f5f7)"}}>
+          <FaSpinner className="spinner" style={{fontSize: "40px", color: "#333", animation: "spin 1s linear infinite"}} />
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
-      <Meta title="Cart" />
-      <BreadCrumb title="Cart" />
+      <Meta title="Giỏ hàng" />
+      <BreadCrumb title="Giỏ hàng" />
       <Container class1="cart-wrapper home-wrapper-2 pb-5">
-        <div className="row">
-          <div className="col-12">
-            <div className="cart-header d-flex justify-content-between align-items-center">
-              <h6 className="cart-col-1">Product</h6>
-              <h6 className="cart-col-2">Price</h6>
-              <h6 className="cart-col-3">Quantity</h6>
-              <h6 className="cart-col-4">Total</h6>
-            </div>
+        <div className="d-flex flex-column cart-item-container justify-content-between">
+          <div className="cart-container">
+            {items.length > 0 && (
+              <div className="cart-header d-flex justify-content-between align-items-center">
+                <h6 className="cart-col-1 fw-bold fs-6">Product</h6>
+                <h6 className="cart-col-2 fw-bold fs-6">Price</h6>
+                <h6 className="cart-col-3 fw-bold fs-6">Quantity</h6>
+                <h6 className="cart-col-4 fw-bold fs-6">Total</h6>
+              </div>
+            )}
 
             {items.length > 0 ? (
               items.map((item, index) => {
                 const { product, price, color } = item;
-                const productId = product?._id;
-                const colorId = color?._id;
-                const quantity = item?.quantity;
+                if (!product || !color) return null;
+
+                const productId = product._id;
+                const colorId = color._id;
+                const quantity = item.quantity;
+                const key = `${productId}-${colorId}`;
 
                 return (
                   <div
                     className="cart-data d-flex justify-content-between align-items-center py-3"
-                    key={index}
+                    key={key}
                   >
                     <div className="cart-col-1 gap-15 d-flex align-items-center">
                       <div className="box-img">
                         <img
-                          src={product?.images?.[0]?.url || "/images/default.jpg"}
-                          alt={product?.title}
+                          src={product.images?.[0]?.url || "/images/default.jpg"}
+                          alt={product.title || "Product"}
                           className="img-fluid w-100"
                         />
                       </div>
                       <div className="content-item">
-                        <h6 className="title text-muted" style={{ fontSize: "14px" }}>
-                          {product?.title}
-                        </h6>
-                        <p className="color text-primary" style={{ fontSize: "12px" }}>
-                          Color: {color?.title || "N/A"}
+                        <h6 className="title fw-bold">{product.title}</h6>
+                        <p
+                          className="color"
+                          style={{
+                            fontSize: "12px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "5px"
+                          }}
+                        >
+                          Màu sắc:
+                          <span
+                            style={{
+                              display: "inline-block",
+                              width: "14px",
+                              height: "14px",
+                              backgroundColor: color?.title || "transparent",
+                              borderRadius: "50%",
+                              border: "1px solid #ccc"
+                            }}
+                          ></span>
+                          {color?.title || "N/A"}
                         </p>
                       </div>
                     </div>
                     <div className="cart-col-2">
-                      <h6 className="price text-dark" style={{ fontSize: "14px" }}>
-                        {price.toLocaleString()}đ
-                      </h6>
+                      <h6 className="price fw-bold">{price.toLocaleString()}đ</h6>
                     </div>
                     <div className="cart-col-3">
                       <div className="d-flex gap-15 align-items-center">
                         <input
                           type="number"
                           className="form-control w-50"
-                          value={quantities[`${productId}-${colorId}`] || quantity}
+                          value={quantities[key] || quantity}
                           onChange={(e) => onQuantityChange(productId, colorId, e)}
                           min={1}
-                          max={product?.quantity - product?.sold}
-                          style={{ fontSize: "14px" }}
+                          max={product.quantity - product.sold}
                         />
                         <MdDelete
                           className="fs-3 text-danger"
@@ -158,7 +216,7 @@ const Cart = () => {
                       </div>
                     </div>
                     <div className="cart-col-4">
-                      <h6 className="total-price text-dark" style={{ fontSize: "14px" }}>
+                      <h6 className="total-price fw-bold text-dark">
                         {(price * quantity).toLocaleString()}đ
                       </h6>
                     </div>
@@ -167,27 +225,32 @@ const Cart = () => {
               })
             ) : (
               <div className="py-3">
-                <h6 className="text-center text-muted">Không có sản phẩm trong giỏ hàng</h6>
+                  <div className="loading-spinner d-flex align-items-center justify-content-center" style={{textAlign: "center", padding: "50px" , height: "70vh"}}>
+                    <h5>Không có sản phẩm nào trong giỏ hàng.</h5>
+                </div>
               </div>
             )}
           </div>
 
           {items.length > 0 && (
-            <div className="col-12 py-2 d-flex justify-content-between">
+            <div className="cart-subtotal d-flex justify-content-between">
               <div>
-                <Link to="/store/" className="btn btn-outline-primary" style={{ fontSize: "14px" }}>
-                  Continue To Shipping
+                <Link to="/store/" className="btn button">
+                  Tiếp tục mua hàng
                 </Link>
               </div>
               <div className="d-flex flex-column align-items-end">
-                <h5 className="text-dark" style={{ fontSize: "16px" }}>
-                  SubTotal: {getCart.cartTotal?.toLocaleString() || 0}đ
+                <button className="button mb-2" onClick={handleEmptyCart}>
+                  Xóa toàn bộ giỏ hàng
+                </button>
+                <h5 className="mt-3 fw-bold fs-5" style={{ fontSize: "16px" }}>
+                  Tổng phụ: {getCart.cartTotal?.toLocaleString() || 0}đ
                 </h5>
-                <p className="text-muted" style={{ fontSize: "12px" }}>
-                  Taxes and shipping calculated at checkout
+                <p className="text-muted">
+                  Thuế và phí vận chuyển được tính khi thanh toán
                 </p>
-                <Link to={"/checkout"} className="btn btn-success" style={{ fontSize: "14px" }}>
-                  Checkout
+                <Link to={"/checkout"} className="button">
+                  Thanh toán 
                 </Link>
               </div>
             </div>

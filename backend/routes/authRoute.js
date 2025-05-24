@@ -69,22 +69,17 @@ router.put("/block-user/:id", authmiddleware, isAdmin, blockUser);
 router.put("/unblock-user/:id", authmiddleware, isAdmin, unblockUser);
 
 router.put("/reset-password/:token", resetPassword);
-
-// Tạo đơn hàng COD
+ 
 router.post("/order/cod", authmiddleware, createOrder);
-
-// Tạo đơn hàng VNPay & callback
+ 
 router.post("/order/create-vnpay-url", authmiddleware, createVNPayUrl);
 router.get("/order/vnpay-return", vnpayReturn);
-
-// Tạo đơn hàng Momo & IPN callback
+ 
 router.post("/order/create-momo-url", authmiddleware, createMomoUrl);
 router.post("/order/momo-ipn", momoIPN);
-
-// Hủy đơn hàng
+ 
 router.post("/order/cancel", authmiddleware, cancelOrder);
-
-// Cập nhật trạng thái đơn (admin)
+ 
 router.put("/order/update-order/:orderId", authmiddleware, isAdmin, updateOrderStatus);
 
 // Lấy tất cả đơn hàng của user

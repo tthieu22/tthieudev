@@ -195,8 +195,11 @@ const Orders = () => {
     product: (
       <ul style={{ paddingLeft: "20px", margin: 0 }}>
         {order?.products?.map((item, i) => (
-          <li key={item?.product?._id || i}>{item?.product?.title || "N/A"}</li>
+          <li key={`${order.orderCode}-${item.product?._id}-${i}`}>
+            {item?.product?.title || "N/A"}
+          </li>
         ))}
+
       </ul>
     ),
     date: new Date(order?.createdAt).toLocaleString(),

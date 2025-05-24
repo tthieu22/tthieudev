@@ -21,19 +21,16 @@ const Color = ({ prop = [], onSelect, selectedColor }) => {
     setInternalSelectedColor(selectedColor);
   }, [selectedColor]);
 
-  // Lấy title của màu đang chọn
-  const selectedColorTitle = colorstate?.find(c => c?._id === internalSelectedColor)?.title || "";
-
   const handleColorClick = (rgbValue) => {
     const foundColor = colorstate?.find(c => c.title === rgbValue);
     if (!foundColor) return;
     setInternalSelectedColor(foundColor._id);
-    if (onSelect) onSelect(foundColor._id);
+    if (onSelect) onSelect(foundColor._id); 
   };
 
   return (
     <>
-      <ul className="colors gap-10 m-0 d-flex" style={{ listStyle: "none", padding: 0 }}>
+      <ul className="colors gap-10 p-0 m-0 d-flex alighn-items-center" style={{ listStyle: "none", padding: 0 }}>
         {prop.length > 0 ? (
           prop.map((rgbValue, index) => {
             const colorObj = colorstate?.find(c => c?.title === rgbValue);
@@ -68,11 +65,6 @@ const Color = ({ prop = [], onSelect, selectedColor }) => {
           <p>No colors available</p>
         )}
       </ul>
-
-      {/* Hiển thị tên màu nếu cần */}
-      {selectedColorTitle && (
-        <p style={{ marginTop: 8 }}>Selected color: {selectedColorTitle}</p>
-      )}
     </>
   );
 };

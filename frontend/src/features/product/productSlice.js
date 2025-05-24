@@ -68,17 +68,46 @@ export const getProductsWithMeta = createAsyncThunk(
     }
   }
 );
-
+export const rating = createAsyncThunk(
+  "product/rating",
+  async (data, thunkAPI) => {  
+    try {
+      return await productService.rating(data);
+    } catch (error) {
+      const message =
+        error.response && error.response.data
+          ? error.response.data
+          : error.message;
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+export const getAllCateogoryProduct = createAsyncThunk(
+  "product/get-all-cateogory-product",
+  async (thunkAPI) => {
+    try {
+      return await productService.getAllCateogoryProduct();
+    } catch (error) {
+      const message =
+        error.response && error.response.data
+          ? error.response.data
+          : error.message;
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+)
 // Initial state
 const productState = {
-  product: null,
-  productInfinity: null,
-  addwishlist: null,
-  colors: null,
+  product: [],
+  productInfinity: [],
+  addwishlist: [],
+  colors: [],
+  productCategory: [],
   Aproduct: null,
   isError: false,
   isSuccess: false,
   isLoading: false,
+  isRating: [],
   message: "",
 };
 
@@ -156,6 +185,32 @@ export const productSlice = createSlice({
         state.productInfinity = action.payload; 
       })
       .addCase(getProductsWithMeta.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      .addCase(rating.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(rating.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.isRating = action.payload;
+      })
+      .addCase(rating.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      .addCase(getAllCateogoryProduct.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getAllCateogoryProduct.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.productCategory = action.payload;
+      })
+      .addCase(getAllCateogoryProduct.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;

@@ -1,48 +1,37 @@
-import React, { useEffect ,useRef } from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import FloatingIcons from "./FloatingIcons";
-import { isTokenExpired } from "../utils/checkTokenExpired";
+import FloatingIcons from "./FloatingIcons"; 
 
-const Layout = () => {
-  const navigate = useNavigate();
-  const notifiedRef = useRef(false);
-  const location = useLocation();
+const Layout = () => { 
+  const [loading, setLoading] = useState(true); 
 
-  useEffect(() => {
-    if (notifiedRef.current) return;
 
-    const token = localStorage.getItem("token");
-
-    if (token && isTokenExpired(token)) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("customer");
-      toast.error("Phiên đăng nhập đã hết hạn. Nhấn vào đây để đăng nhập lại.", {
-        onClick: () => {
-          navigate("/login");
-        },
-        autoClose: false,
-      });
-      notifiedRef.current = true;
-    } else if (!token) {
-      if (location.pathname !== "/" && location.pathname !== "/login" && location.pathname !== "/store" && location.pathname !== "/sign-up" && location.pathname !== "/forgot-password" && location.pathname !== "/compare-product" && location.pathname !== "/blogs") {
-        toast.error("Bạn cần đăng nhập để sử dụng tính năng này.", {
-          onClick: () => {
-            navigate("/login");
-          },
-          autoClose: false,
-        });
-        notifiedRef.current = true;
-      }
-      
-    }
-  }, [location, navigate]);
+  useEffect(() => {  
+    const timer = setTimeout(() => setLoading(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+  const ScrollToTop = () => {
+    const { pathname } = useLocation();
+  
+    useEffect(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, [pathname]);
+  
+    return null;
+  };
   
   return (
     <div>
+      {loading && (
+        <div className="loading-overlay">
+          <div className="loading-content">tthieu.dev</div>
+        </div>
+      )}
+      <ScrollToTop />
       <Header />
       <Outlet />
       <Footer />

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import BreadCrumb from "../components/BreadCrumb";
 import Meta from "../components/Meta";
 import { FaHome } from "react-icons/fa";
@@ -7,31 +7,66 @@ import { IoMdMail, IoIosInformationCircle } from "react-icons/io";
 import Container from "../components/Container";
 import * as Yup from "yup";
 import { useFormik } from "formik";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { createEnquiry } from "../features/enquirry/enquirySlice";
 
 let schema = Yup.object().shape({
-  name: Yup.string().required("Title is required"),
-  email: Yup.string().required("Description is required"),
-  mobile: Yup.string().required("Category is required"),
-  comment: Yup.array().required("At least one image is required"),
+  name: Yup.string().required("Name is required"),
+  email: Yup.string().email("Invalid email").required("Email is required"),
+  mobile: Yup.string().required("Mobile is required"),
+  comment: Yup.string().required("Comment is required"),
 });
 
 const Contact = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const customer = localStorage.getItem("customer")
+    ? JSON.parse(localStorage.getItem("customer"))
+    : null;
+ 
+  const { isCreateEnquiry, isError, message } = useSelector(
+    (state) => state.enquiry
+  );
+ 
+  useEffect(() => {
+    if (isCreateEnquiry) {
+      toast.success("Gửi phản hồi thành công."); 
+    }
+  }, [isCreateEnquiry]);
+ 
+  useEffect(() => {
+    if (isError && message) {
+      toast.error(message);
+    }
+  }, [isError, message]);
+
   const formik = useFormik({
     initialValues: {
-      name: "",
-      email: "",
-      mobile: "",
+      name: customer ? `${customer.firstname} ${customer.lastname}` : "",
+      email: customer ? customer.email : "",
+      mobile: customer ? customer.mobile : "",
       comment: "",
     },
-    validationSchema: schema, 
-    onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
+    validationSchema: schema,
+    onSubmit: ({ name, email, mobile, comment }) => {
+      if (!customer) {
+        toast.error("Vui lòng đăng nhập để gửi phản hồi.", {
+          onClick: () => navigate("/login"),
+          autoClose: false,
+        });
+        return;
+      }
+      dispatch(createEnquiry({ name, email, mobile, comment }));
     },
   });
+
   return (
     <>
-      <Meta title={"Contact"}></Meta>
-      <BreadCrumb title="Contact" />
+      <Meta title={"Liên hệ"} />
+      <BreadCrumb title="Liên hệ" />
       <Container class1="contact-wrapper py-5 home-wapper-2">
         <div className="row">
           <div className="col-12">
@@ -49,9 +84,8 @@ const Contact = () => {
           <div className="row mt-5 ">
             <div className="contact-inner-wapper d-flex justify-content-between ">
               <div className="col-6 left">
-                <h3 className="contact-title mb-4">Contact Us</h3>
+                <h3 className="contact-title mb-4">Gửi phản hồi cho chúng tôi</h3>
                 <form
-                  action=""
                   className="d-flex flex-column gap-20"
                   onSubmit={formik.handleSubmit}
                 >
@@ -63,17 +97,27 @@ const Contact = () => {
                       placeholder="Name"
                       onChange={formik.handleChange}
                       value={formik.values.name}
+                      readOnly={!!customer}
+                      onBlur={formik.handleBlur}
                     />
+                    {formik.touched.name && formik.errors.name ? (
+                      <div className="error">{formik.errors.name}</div>
+                    ) : null}
                   </div>
                   <div>
                     <input
-                      type="text"
+                      type="email"
                       name="email"
                       className="form-control"
                       placeholder="Email"
                       onChange={formik.handleChange}
                       value={formik.values.email}
+                      readOnly={!!customer}
+                      onBlur={formik.handleBlur}
                     />
+                    {formik.touched.email && formik.errors.email ? (
+                      <div className="error">{formik.errors.email}</div>
+                    ) : null}
                   </div>
                   <div>
                     <input
@@ -83,11 +127,15 @@ const Contact = () => {
                       placeholder="Mobile"
                       onChange={formik.handleChange}
                       value={formik.values.mobile}
+                      readOnly={!!customer}
+                      onBlur={formik.handleBlur}
                     />
+                    {formik.touched.mobile && formik.errors.mobile ? (
+                      <div className="error">{formik.errors.mobile}</div>
+                    ) : null}
                   </div>
                   <div>
                     <textarea
-                      type="text"
                       cols={30}
                       rows={4}
                       className="form-control"
@@ -95,38 +143,41 @@ const Contact = () => {
                       name="comment"
                       onChange={formik.handleChange}
                       value={formik.values.comment}
+                      onBlur={formik.handleBlur}
                     />
+                    {formik.touched.comment && formik.errors.comment ? (
+                      <div className="error">{formik.errors.comment}</div>
+                    ) : null}
                   </div>
-                  <button className="button w-25">Submit</button>
+                  <button type="submit" className="button w-25">
+                    Submit
+                  </button>
                 </form>
               </div>
               <div className="col-6 right">
-                <h3 className="contact-title mb-4">Get Touch With Us</h3>
-                <div>
-                  <ul className="ps-0">
-                    <li className="mb-3 d-flex align-baseline gap-15">
-                      <FaHome className="fs-5" />
-                      <address className="m-0">
-                        Hno:Z115 QuyetThang Thai Nguyen City, Thai Nguyen, Viet
-                        Nam
-                      </address>
-                    </li>
-                    <li className="mb-3 d-flex align-baseline gap-15">
-                      <IoCall className="fs-5" />
-                      <a href="tel:+84 563650708">+84 563650708</a>
-                    </li>
-                    <li className="mb-3 d-flex align-baseline gap-15">
-                      <IoMdMail className="fs-5" />
-                      <a href="mailto:tthieudev.02@gmail.com">
-                        tthieudev.02@gmail.com
-                      </a>
-                    </li>
-                    <li className="mb-3 d-flex align-baseline gap-15">
-                      <IoIosInformationCircle className="fs-5" />
-                      <p>Monday - Friday 10AM - 8PM</p>
-                    </li>
-                  </ul>
-                </div>
+                <h3 className="contact-title mb-4">Liên hệ với chúng tôi</h3>
+                <ul className="ps-0">
+                  <li className="mb-3 d-flex align-baseline gap-15">
+                    <FaHome className="fs-5" />
+                    <address className="m-0">
+                      Đ/c: Hưng Hà, Thái Bình, Việt Nam
+                    </address>
+                  </li>
+                  <li className="mb-3 d-flex align-baseline gap-15">
+                    <IoCall className="fs-5" />
+                    <a href="tel:+84 563650708">+84 563650708</a>
+                  </li>
+                  <li className="mb-3 d-flex align-baseline gap-15">
+                    <IoMdMail className="fs-5" />
+                    <a href="mailto:tthieudev.02@gmail.com">
+                      tthieudev.02@gmail.com
+                    </a>
+                  </li>
+                  <li className="mb-3 d-flex align-baseline gap-15">
+                    <IoIosInformationCircle className="fs-5" />
+                    <p>Thứ 2 - 6 | 8AM - 8PM</p>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>

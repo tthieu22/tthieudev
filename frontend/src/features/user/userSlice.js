@@ -1,20 +1,7 @@
 import { createSlice, createAsyncThunk} from "@reduxjs/toolkit";
 import { authService } from "./userService";
 import { toast } from "react-toastify";
-
-// get token
-const getTokenFromLocalStorage = localStorage.getItem("customer")
-  ? JSON.parse(localStorage.getItem("customer")).token
-  : null;
-
-// config
-export const config = {
-  headers: {
-    Authorization: `Bearer ${getTokenFromLocalStorage}`,
-    Accept: "application/json",
-  },
-};
-
+import {getTokenFromLocalStorage , getUserFromLocalStorage} from "../../utils/axiosConfig";
 // register
 export const registerUser = createAsyncThunk(
   "auth/register",
@@ -106,9 +93,9 @@ export const updateCartItemQuantity = createAsyncThunk(
 // Delte item
 export const deleteCartItem = createAsyncThunk(
   "cart/delete-item",
-  async (cartData, thunkAPI) => {
+  async ({ productId, colorId }, thunkAPI) => {
     try {
-      return await authService.deleteCartItem(cartData);
+      return await authService.deleteCartItem({ productId, colorId });
     } catch (error) {
       const message =
         error.response && error.response.data
@@ -119,7 +106,7 @@ export const deleteCartItem = createAsyncThunk(
   }
 )
 // Empty cart
-export const emptyCart = createAsyncThunk(
+export const emptyCartAction = createAsyncThunk(
   "cart/empty-cart",
   async (thunkAPI) => {
     try {
@@ -171,17 +158,40 @@ export const updateUserProfile = createAsyncThunk(
     }
   }
 );
+
+export const forgotPassword = createAsyncThunk(
+  "auth/forgot-password",
+  async (email, thunkAPI) => {
+    try {
+      return await authService.forgotPassword(email);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const resetPassword = createAsyncThunk(
+  "auth/reset-password",
+  async ({ token, password }, thunkAPI) => {
+    try {
+      return await authService.resetPassword(token, password);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
 // Initial state
 const initialState = {
-  user: getTokenFromLocalStorage,
+  user: getTokenFromLocalStorage(),
   createUser: null,
-  loginuser: null,
-  addCart: null,
+  loginuser: getUserFromLocalStorage(),
+  isAddCart: false,
   getCart: null,
   updateQuantityItem: null,
   removeItem: null,
   emptyCart: null,
-  wishlist: null,
+  wishlist: [],
   isApplyCoupon: null,
   isError: false,
   isSuccess: false,
@@ -195,12 +205,11 @@ export const authSlice = createSlice({
     resetStatus: (state) => {
       state.isSuccess = false;
       state.isError = false;
-      state.isLoading = false;
-      // Reset các trạng thái hành động cụ thể nếu cần
+      state.isLoading = false; 
       state.updateQuantityItem = null;
       state.removeItem = null;
       state.emptyCart = null;
-      state.addCart = null;
+      state.isAddCart = false;
       state.message = "";
       state.isApplyCoupon = null;
     },
@@ -216,7 +225,11 @@ export const authSlice = createSlice({
         state.isError = false;
         state.isSuccess = true;
         state.createUser = action.payload;
-        toast.info("User created successfully");
+        toast.info("User created successfully", {
+          onClick: () => {
+            navigator("/login");
+          }
+        });
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -259,7 +272,7 @@ export const authSlice = createSlice({
       .addCase(getAWishList.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isError = false;
-        state.isSuccess = true;
+        state.isSuccess = true; 
         state.wishlist = action.payload;
       })
       .addCase(getAWishList.rejected, (state, action) => {
@@ -277,12 +290,13 @@ export const authSlice = createSlice({
         state.isLoading = false;
         state.isError = false;
         state.isSuccess = true;
-        state.addCart = action.payload;
+        state.isAddCart = true;
       })
       .addCase(addToCart.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.isSuccess = false;
+        state.isAddCart = false;
         state.message = action.payload || action.error.message;
       })
       // Get cart
@@ -334,16 +348,16 @@ export const authSlice = createSlice({
         state.message = action.payload || action.error.message;
       })
       // Empty cart
-      .addCase(emptyCart.pending, (state) => {
+      .addCase(emptyCartAction.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(emptyCart.fulfilled, (state, action) => {
+      .addCase(emptyCartAction.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isError = false;
         state.isSuccess = true;
         state.emptyCart = action.payload;
       })
-      .addCase(emptyCart.rejected, (state, action) => {
+      .addCase(emptyCartAction.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.isSuccess = false;
@@ -374,6 +388,7 @@ export const authSlice = createSlice({
         state.isError = false;
         state.isSuccess = true;
         state.user = null;
+        state.loginuser = null;
         localStorage.removeItem("customer");
         localStorage.removeItem("token");
         toast.success("Đăng xuất thành công");
@@ -382,7 +397,47 @@ export const authSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
         state.isSuccess = false;
-        state.message = action.payload || action.error.message;
+        state.user = null;
+        state.loginuser = null;
+        localStorage.removeItem("customer");
+        localStorage.removeItem("token");
+        toast.success("Đăng xuất thành công");
+      })
+      
+      // forgotPassword
+      .addCase(forgotPassword.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        state.isSuccess = false;
+        state.message = "";
+      })
+      .addCase(forgotPassword.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.message = "Password reset email sent";
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload || "Failed to send reset email";
+      })
+
+      // resetPassword
+      .addCase(resetPassword.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        state.isSuccess = false;
+        state.message = "";
+      })
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.message = "Password reset successful";
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload || "Password reset failed";
       });
   },
 });

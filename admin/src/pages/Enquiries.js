@@ -251,7 +251,7 @@ const Enquiries = () => {
       {/* Modal nhập phản hồi */}
       <Modal
         title={`Phản hồi cho enquiry: ${selectedEnquiry?.name || ""}`}
-        visible={feedbackModalVisible}
+        open={feedbackModalVisible}
         onOk={handleFeedbackOk}
         onCancel={handleFeedbackCancel}
         okText="Gửi phản hồi"

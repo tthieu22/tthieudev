@@ -72,55 +72,145 @@ const getAllProduct = asyncHandler(async (req, res) => {
   }
 });
 
-// Get all products with meta data
 const getAllProductsWithMeta = asyncHandler(async (req, res) => {
   try {
-    const queryObj = { ...req.query };
+    const queryObj = {};
+    const {
+      page = 1,
+      limit = 10,
+      sort,
+      fields,
+      category,
+      tags,
+      inStock,
+      color,
+      title,
+      "price[gte]": priceGte,
+      "price[lte]": priceLte,
+    } = req.query;
 
-    if (queryObj.search) {
-      queryObj.title = { $regex: queryObj.search, $options: "i" };
-      delete queryObj.search;
+    // 1. Lọc theo tiêu đề sản phẩm
+    if (title) {
+      queryObj.title = { $regex: title, $options: "i" };
     }
 
-    const excludeFields = ["page", "sort", "limit", "fields"];
-    excludeFields.forEach((el) => delete queryObj[el]);
+    // 2. Lọc theo danh mục
+    if (category) {
+      queryObj.category = category;
+    }
 
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-    let query = Product.find(JSON.parse(queryStr));
+    // 3. Lọc theo tag
+    if (tags) {
+      queryObj.tags = tags;
+    }
 
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(",").join(" ");
+    // 4. Lọc theo trạng thái kho
+    if (inStock === "true") {
+      queryObj.quantity = { $gt: 0 };
+    } else if (inStock === "false") {
+      queryObj.quantity = { $eq: 0 };
+    }
+
+    // 5. Lọc theo giá
+    if (priceGte || priceLte) {
+      queryObj.price = {};
+      if (priceGte) queryObj.price.$gte = Number(priceGte);
+      if (priceLte) queryObj.price.$lte = Number(priceLte);
+    }
+
+    // 6. Lọc theo màu sắc (giả sử color là mảng slug hoặc tên màu)
+    if (color) {
+      if (Array.isArray(color)) {
+        queryObj.color = { $in: color };
+      } else {
+        queryObj.color = color;
+      }
+    }
+
+    // 7. Truy vấn chính
+    let query = Product.find(queryObj);
+
+    // 8. Sắp xếp
+    if (sort) {
+      const sortBy = sort.split(",").join(" ");
       query = query.sort(sortBy);
     } else {
       query = query.sort("-createdAt");
     }
 
-    if (req.query.fields) {
-      const fields = req.query.fields.split(",").join(" ");
-      query = query.select(fields);
+    // 9. Chọn trường cần thiết
+    if (fields) {
+      const selectedFields = fields.split(",").join(" ");
+      query = query.select(selectedFields);
     } else {
       query = query.select("-__v");
     }
 
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-    query = query.skip(skip).limit(limit);
+    // 10. Phân trang
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    query = query.skip(skip).limit(parseInt(limit));
 
-    const productCount = await Product.countDocuments(JSON.parse(queryStr));
+    const total = await Product.countDocuments(queryObj);
     const products = await query;
 
+    // 11. Đếm số sản phẩm còn hàng và hết hàng (dùng cùng bộ lọc khác quantity)
+    const inStockCount = await Product.countDocuments({ ...queryObj, quantity: { $gt: 0 } });
+    const outOfStockCount = await Product.countDocuments({ ...queryObj, quantity: { $eq: 0 } });
+
+    // 12. Trả kết quả
     res.json({
       products,
-      totalProducts: productCount,
-      totalPages: Math.ceil(productCount / limit),
-      currentPage: page,
+      totalProducts: total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: parseInt(page),
+      inStockCount,
+      outOfStockCount,
     });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
+
+async function analyzeProductsByIds(productIds) {
+  try {
+    if (!Array.isArray(productIds) || productIds.length === 0) {
+      throw new Error("Danh sách productIds không hợp lệ.");
+    }
+ 
+    const products = await Product.find(
+      { _id: { $in: productIds } },
+      "title description price brand category totalrating sold tags"
+    ).lean(); 
+
+    // Nếu không có sản phẩm
+    if (!products || products.length === 0) {
+      return {
+        type: "compare_product",
+        summary: "Không có sản phẩm nào phù hợp.",
+      };
+    }
+
+    const prompt = createSummaryPrompt(products);
+
+    if (!prompt || typeof prompt !== "string") {
+      throw new Error("Prompt tạo ra không hợp lệ.");
+    }
+
+    const summary = await callGemini(prompt);
+
+    return {
+      type: "compare_product",
+      summary: summary || "Không thể tạo được tóm tắt.",
+    };
+  } catch (error) {
+    console.error("Lỗi phân tích sản phẩm:", error.message);
+    return {
+      type: "compare_product",
+      summary: `Đã xảy ra lỗi khi phân tích sản phẩm: ${error.message}`,
+    };
+  }
+}
 
 const updateProduct = asyncHandler(async (req, res) => {
   const { id } = req.params;

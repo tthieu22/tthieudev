@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"; 
+import React, { useEffect, useState } from "react";
 import BlogCard from "../components/BlogCard";
 import ProductCard from "../components/ProductCard";
 import SpecialProduct from "../components/SpecialProduct";
@@ -12,14 +12,22 @@ import { getAllProduct } from "../features/product/productSlice";
 import BannerSection from "../components/BannerSection";
 import BrandMarquee from "../components/BrandMarquee";
 import FamousCard from "../components/FamousCard";
+import { FaSpinner } from "react-icons/fa";
+
 const Home = () => {
   const dispatch = useDispatch();
-  const blogstate = useSelector((state) => state?.blog?.blog);
-  const products = useSelector((state) => state?.product?.product || []);
+  const blogstate = useSelector((state) => state.blog?.blog);
+  const products = useSelector((state) => state.product?.product);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dispatch(getAllBlog());
-    dispatch(getAllProduct());
+    const fetchData = async () => {
+      setLoading(true);
+      await dispatch(getAllBlog());
+      await dispatch(getAllProduct());
+      setLoading(false);
+    };
+    fetchData();
   }, [dispatch]);
 
   const specialProducts = products?.filter((item) => item?.tags?.includes("Special")).slice(0, 4);
@@ -28,33 +36,36 @@ const Home = () => {
   const mainBannerData = products?.filter((item) => item?.tags?.includes("SUPPERCHARGED")).slice(0, 4);
   const smallBannerData = products?.filter((item) => item?.tags?.includes("Sale")).slice(0, 4);
   const famousProducts = products?.filter((item) => item?.tags?.includes("Famous")).slice(0, 4);
+
+  if (loading) {
+    return (
+      <>  
+          <div className="loading-spinner d-flex align-items-center justify-content-center" style={{textAlign: "center", padding: "50px" , height: "100vh"}}>
+            <FaSpinner className="spinner" style={{fontSize: "40px", color: "#333", animation: "spin 1s linear infinite"}} />
+        </div>
+      </>
+    );
+  }
   return (
     <>
       <Meta title={"Trang chủ"}></Meta>
-      <Container class1="home-wapper-1">
-      <BannerSection
-        mainBannerData={mainBannerData}
-        smallBannerData={smallBannerData}
-      />
-
-      </Container>
-
-      <div className="home-wapper-2 py-4 px-5">  
-        <div className="service d-flex align-items-center justify-content-between">
-          {services?.map((i, j) => {
-            return (
-              <div key={i.id || j} className="d-flex align-items-center gap-15">
-                <img src={i.image} alt="service" />
-                <div>
-                  <h6>{i.title}</h6>
-                  <p className="mb-0">{i.tagline}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div> 
+      <div className="banner-gadient">
+        <BannerSection mainBannerData={mainBannerData} smallBannerData={smallBannerData} />
       </div>
 
+      <div className="home-wapper-2 py-4 px-5">
+        <div className="service d-flex align-items-center justify-content-between">
+          {services?.map((i, j) => (
+            <div key={i.id || j} className="d-flex align-items-center gap-15">
+              <img src={i.image} alt="service" />
+              <div>
+                <h6>{i.title}</h6>
+                <p className="mb-0">{i.tagline}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <Container class1="fetured-wapper py-5">
         <div className="row">
@@ -66,7 +77,7 @@ const Home = () => {
       </Container>
 
       <Container class1="famous-wapper py-5 home-wapper-2">
-          <FamousCard  prod={ famousProducts} />
+        <FamousCard prod={famousProducts} />
       </Container>
 
       <Container class1="special-wapper py-5 ">
@@ -74,7 +85,7 @@ const Home = () => {
           <div className="col-12">
             <h3 className="section-heading">Sản phẩm đặc biệt</h3>
           </div>
-          {specialProducts.map((item) => (
+          {specialProducts?.map((item) => (
             <SpecialProduct
               key={item?._id}
               id={item?._id}
@@ -117,9 +128,7 @@ const Home = () => {
                   title={item?.title}
                   description={item?.description}
                   image={item?.images[0]?.url}
-                  date={moment(item?.created_at).format(
-                    "MMMM Do YYYY, h:mm:ss a"
-                  )}
+                  date={moment(item?.created_at).format("MMMM Do YYYY, h:mm:ss a")}
                 />
               );
             }

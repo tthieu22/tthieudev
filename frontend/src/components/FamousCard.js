@@ -1,5 +1,5 @@
 import React from "react";
-
+import { Link } from "react-router-dom";
 const FamousCard = ({ prod }) => {
   if (!prod || prod.length === 0) {
     return ;
@@ -8,7 +8,7 @@ const FamousCard = ({ prod }) => {
   return (
     <div className="row">
       {prod.map((product) => (
-        <div key={product._id} className="col-3">
+        <Link to={`/product/${product._id}`} key={product._id} className="col-3">
           <div className="famous-card  position-relative">
             <img
               src={product.images[0]?.url || "images/famous.jpg"}
@@ -21,7 +21,7 @@ const FamousCard = ({ prod }) => {
               <p className="text-black"> Từ <span className="red-p">{ Number(product.price).toLocaleString("vi-VN") + " ₫"}</span></p>
             </div>
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   );

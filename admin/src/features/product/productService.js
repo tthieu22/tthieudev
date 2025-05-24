@@ -1,11 +1,10 @@
-import axios from "axios";
-import { base_url } from "../../utils/base_url";
-import { config } from "../../utils/axiosconfig";
+import axios from "axios"; 
+import { getConfig, base_url } from "../../utils/axiosconfig";
 
 // Function to get all products
 const getProducts = async () => {
   try {
-    const response = await axios.get(`${base_url}product`, config);
+    const response = await axios.get(`${base_url}product`, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -15,7 +14,7 @@ const getProducts = async () => {
 // Function to create a new product
 const createProduct = async (product) => {
   try {
-    const response = await axios.post(`${base_url}product`, product, config);
+    const response = await axios.post(`${base_url}product`, product, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error creating product:", error);
@@ -26,7 +25,7 @@ const createProduct = async (product) => {
 // Upload images for a product
 const uploadImagesProduct = async (productId, formData) => {
   try {
-    const response = await axios.put( `${base_url}product/upload/${productId}`,formData, config );
+    const response = await axios.put( `${base_url}product/upload/${productId}`,formData, getConfig() );
     return response.data;
   } catch (error) {
     console.error("Error uploading images:", error);
@@ -39,7 +38,7 @@ const deleteImageProduct = async (public_id) => {
   try {
     const response = await axios.delete(
       `${base_url}product/delete-img/${public_id}`,
-      config
+      getConfig()
     );
     return response.data;
   } catch (error) {
@@ -62,7 +61,7 @@ const getaProduct = async (id) => {
 // Update a product
 const updateProduct = async (id, product) => {  
   try {
-    const response = await axios.put(`${base_url}product/${id}`, product, config);
+    const response = await axios.put(`${base_url}product/${id}`, product, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error updating product:", error);
@@ -73,7 +72,7 @@ const updateProduct = async (id, product) => {
 // Delete a product
 const deleteProduct = async (id) => {
   try {
-    const response = await axios.delete(`${base_url}product/${id}`, config);
+    const response = await axios.delete(`${base_url}product/${id}`, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error deleting product:", error);

@@ -3,9 +3,7 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 
 async function callGemini(prompt) {
   const apiKey = process.env.GEMINI_API_KEY;
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-  console.log("GEMINI_API_KEY:", apiKey);
-
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`; 
   const res = await fetch(endpoint, {
     method: "POST",
     headers: {

@@ -13,7 +13,7 @@ const TypingEffect = ({ text, speed = 20, onComplete }) => {
       if (match.index > lastIndex) {
         parts.push({ type: "text", content: text.slice(lastIndex, match.index) });
       }
-      parts.push({ type: "bold", content: match[1] }); // bỏ dấu **
+      parts.push({ type: "bold", content: match[1] });
       lastIndex = match.index + match[0].length;
     }
 
@@ -25,31 +25,35 @@ const TypingEffect = ({ text, speed = 20, onComplete }) => {
   };
 
   useEffect(() => {
-    const parsed = parseText(text);
+    let isCancelled = false;
 
-    // Tách thành từng ký tự để hiện dần
+    const parsed = parseText(text);
     const flatChars = [];
     parsed.forEach((part) => {
-      part.content.split("").forEach((char) => {
+      Array.from(part.content).forEach((char) => {
         flatChars.push({ char, type: part.type });
       });
     });
 
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i < flatChars.length) {
-        setDisplayedElements((prev) => [...prev, flatChars[i]]);
-        i++;
-      } else {
-        clearInterval(interval);
-        if (onComplete) onComplete();
-      }
-    }, speed);
+    const runTyping = async () => {
+      setDisplayedElements([]); // Reset trước khi bắt đầu
 
-    return () => clearInterval(interval);
+      for (let i = 0; i < flatChars.length; i++) {
+        if (isCancelled) return;
+        setDisplayedElements((prev) => [...prev, flatChars[i]]);
+        await new Promise((resolve) => setTimeout(resolve, speed));
+      }
+
+      if (onComplete) onComplete();
+    };
+
+    runTyping();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [text, speed, onComplete]);
 
-  // Gộp các ký tự cùng type lại thành đoạn text hoặc đoạn bold
   const grouped = displayedElements.reduce((acc, item) => {
     if (!item) return acc;
     const last = acc[acc.length - 1];

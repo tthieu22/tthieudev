@@ -1,4 +1,7 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import Container from "../components/Container";
 import BreadCrumb from "../components/BreadCrumb";
 import Meta from "../components/Meta";
 import ProductCard from "../components/ProductCard";
@@ -6,186 +9,166 @@ import StarRatings from 'react-star-ratings';
 import Color from "../components/Color";
 import wish from "../images/wish.svg";
 import filledWish from "../images/wished.svg";
+import ProductReview from "../components/ProductReview";
 import { DiGitCompare } from "react-icons/di";
-import { useDispatch, useSelector } from "react-redux";
-import Container from "../components/Container";
-import { useLocation ,useNavigate} from "react-router-dom";
-import { getAproduct } from "../features/product/productSlice";
-import { getAWishList ,addToCart } from "../features/user/userSlice";
 import { toast } from "react-toastify";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { getAllCompare, addToCompare,resetStatusCompare } from "../features/compare/compareSlice";
-import { addToWishList ,getAllProduct } from "../features/product/productSlice";
-
-let schema = Yup.object().shape({
-  productId: Yup.string().required("Required"),
-  quantity: Yup.number()
-    .required("Bạn chưa nhập số lượng")
-    .min(1, "Số lượng phải lớn hơn 0"),
-  color: Yup.string().required("Hãy chọn màu sắc"),
-});
+import { getAproduct, addToWishList, getAllProduct } from "../features/product/productSlice";
+import { getAWishList, addToCart } from "../features/user/userSlice";
+import { getAllCompare, addToCompare } from "../features/compare/compareSlice";
+import { FaSpinner } from "react-icons/fa";
 
 const SingleProduct = () => {
-  const [orderedProduct] = useState(true);
-  const [rating, setRating] = useState(5);
-  const [load, setLoad] = useState(true);
   const dispatch = useDispatch();
-  const location = useLocation();
   const navigate = useNavigate();
+  const location = useLocation();
   const productId = location.pathname.split("/").pop();
 
-  const otherproductstate = useSelector((state) => state?.product?.product) || [];
-  const productState = useSelector((state) => state?.product?.Aproduct || []);
-  const wishliststate = useSelector((state) => state?.auth?.wishlist?.wishlist || []);
-  const otherProducts = otherproductstate
-  .filter((product) => product._id !== productId)
-  .slice(0, 4);
+  const [productState, setProductState] = useState(null); 
+  const [allProducts, setAllProducts] = useState([]);
+  const [mainImage, setMainImage] = useState(""); 
+  const [compared, setCompared] = useState(false); 
+  const [loading, setLoading] = useState(true);
+  const otherProducts = allProducts.filter((p) => p._id !== productId).slice(0, 4);
 
-  
-  const newCart = useSelector((state) => state.auth) || [];
-  const { isSuccess, isError, addCart } = newCart || {};
-  const [isClickedAddToCart, setIsClickedAddToCart] = useState(false);
+  const { wishlist } = useSelector((state) => state.auth?.wishlist || []);    
+  const { isAddCompare } = useSelector((state) => state?.compare || []); 
 
-  // Compare
-  const compareState = useSelector((state) => state?.compare) || [];
-  const { isAddCompare } = compareState || {};
-  const [isClickAddCompare, setIsClickAddCompare] = useState(false);
-
-  const [compared, setCompared] = useState(false);
-  // Check Compare
-  useEffect(() => {
-    const existingCompare = JSON.parse(localStorage.getItem("compare")) || [];
-    const isCompared = existingCompare.some(item => item._id === productId);
-    setCompared(isCompared);
-  }, [productId]);
-  
-  // Add Compare
-  const handleAddToCompare = () => {
-    if (productId !== undefined) {
-      dispatch(addToCompare(productId));
-      dispatch(resetStatusCompare());
-      setIsClickAddCompare(true);
-    }
-  }
-
-  // Get Product
+  const [wishlistChanged, setWishlistChanged] = useState(false);
+  const [compareChanged, setCompareChanged] = useState(false);
   useEffect(() => { 
-    if(load === false) return;
-    if (productId !== undefined) {
-      dispatch(getAproduct(productId));
-      dispatch(getAllCompare());
-      dispatch(getAWishList());
-      dispatch(getAllProduct());
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [productId]);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!productId) return;
+      setLoading(true); 
+
+      const productAction = await dispatch(getAproduct(productId));
+      const allProductAction = await dispatch(getAllProduct());
+      await dispatch(getAWishList());
+
+      setProductState(productAction?.payload || null);
+      setAllProducts(allProductAction?.payload || []); 
+
+      const existingCompare = JSON.parse(localStorage.getItem("compare")) || [];
+      const isAlreadyCompared = existingCompare.some(item => item._id === productId);
+      setCompared(isAlreadyCompared);
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [dispatch, productId]);
+
+  useEffect(() => {
+    if (productState?.images?.length > 0) {
+      setMainImage(productState.images[0].url); 
     }
-    setLoad(false);
-  }, [dispatch, productId,load]);  
-  
-  // Handle Rating
-  const handleRatingChange = (newRating) => {
-    setRating(newRating);
+  }, [productState]);
+
+  const handleThumbnailClick = (imageUrl) => {
+    setMainImage(imageUrl);
   };
 
-  // Formilk
+  const schema = Yup.object().shape({
+    productId: Yup.string().required(),
+    quantity: Yup.number().min(1).required(),
+    colorId: Yup.string().required("Hãy chọn màu sắc"),
+  });
+
   const formik = useFormik({
     initialValues: {
       productId: productId || "",
       quantity: 1,
-      color: "",
+      colorId: "",
     },
+    enableReinitialize: true,
     validationSchema: schema,
-    onSubmit: (values) => {
-      dispatch(addToCart({
-        productId: values.productId,
-        quantity: values.quantity,
-        colorId: values.color,
-      }));
-      setIsClickedAddToCart(true);
-      formik.resetForm();
-    },
-  });
-  
-  // Toast
-  useEffect(() => {
-    if (!isClickedAddToCart) return;
-    if (isSuccess === true &&  addCart !== undefined) {
-      toast.success("Đã thêm vào giỏ hàng", {
-        onClick: () => {
-          navigate("/cart");
-        },
-      });
-    } 
-    else if (isError === true) {
-      toast.error("Thêm vào giỏ hàng thất bại. Vui lòng đăng nhập để thực hiện thao tác này", {
-        onClick: () => {
-          navigate("/login");
-        },
-        autoClose: false,
-      });
-      
-    }
-   
-    
-    setIsClickedAddToCart(false);
-  }, [isSuccess, addCart, isError, isClickedAddToCart ,navigate]);
-  // Toast Compare
-  useEffect(() => {
-    if(!isClickAddCompare) return;
-    if (isAddCompare === true ) {
-      toast.success(compareState?.message);
-      setCompared(true);
-    }
-    if (isAddCompare === false) {
-      toast.info(compareState?.message);
-      setCompared(false);
-    }
-    setIsClickAddCompare(false);
-  }, [isAddCompare, compareState?.message ,isClickAddCompare]);
-
-  // Copy Link
-  const copyToClipboard = (text) => {
-    var textField = document.createElement("textarea");
-    textField.innerText = text;
-    document.body.appendChild(textField);
-    textField.select();
-    document.execCommand("copy");
-    textField.remove();
-    toast.success("Đã sao chép liên kết vào clipboard")
-  };
-
-  // Add To Wishlist
-  const addToWishlist = (id) => {
-    const isInWishlist = wishliststate.some((item) => item._id === id);
-    dispatch(addToWishList(id));
-    setTimeout(() => {
-      if (isInWishlist) {
-        toast.info("Đã xóa khỏi danh sách yêu thích");
+    onSubmit: async (values, { resetForm }) => {
+      const resultAction = await dispatch(addToCart(values));
+      if (addToCart.fulfilled.match(resultAction)) {
+        toast.success("Thêm vào giỏ hàng thành công");
+        resetForm();
       } else {
-        toast.success("Đã thêm vào danh sách yêu thích");
+        toast.error("Thêm vào giỏ hàng thất bại. Vui lòng đăng nhập để thực hiện thao tác này", {
+          onClick: () => navigate("/login"),
+          autoClose: false,
+        });
       }
-      setLoad(true);
-    }, 300);
+    },
+    
+  });
+ 
+  useEffect(() => {
+    if (wishlistChanged && Array.isArray(wishlist)) {
+      
+      const isInWishlist = wishlist.some(item => item._id === productId); 
+      if (isInWishlist) {
+        toast.success("Đã thêm vào danh sách yêu thích");
+      } else {
+        toast.info("Đã xóa khỏi danh sách yêu thích");
+      }
+      setWishlistChanged(false);
+    }
+  }, [wishlist, wishlistChanged, productId]);
+ 
+  useEffect(() => {
+    if(!compareChanged) return;
+    if (isAddCompare ) {
+      toast.success("Đã thêm vào danh sách so sánh"); 
+      setCompared(isAddCompare);
+    }
+    if (!isAddCompare) {
+      setCompared(isAddCompare);
+      toast.info("Đã xóa khỏi danh sách so sánh");
+    }  
+    setCompareChanged(false);
+    
+  }, [isAddCompare, productId , compareChanged, dispatch]);
+  
+  const addToWishlist = async (id) => {
+    await dispatch(addToWishList(productId)); 
+    await dispatch(getAWishList());
+    setWishlistChanged(true);
   };
 
-  return (
-    <>
-      <Meta title={"Product Name"}></Meta>
+  const handleAddToCompare = async () => {
+    await dispatch(addToCompare(productId)); 
+    await dispatch(getAllCompare());  
+    setCompareChanged(true);
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Đã sao chép liên kết vào clipboard");
+  };
+  if (loading) {
+    return (
+      <> 
+        <Meta title={productState?.title}></Meta>
+        <BreadCrumb title={productState?.title} /> 
+          <div className="loading-spinner d-flex align-items-center justify-content-center" style={{textAlign: "center", padding: "50px" , height: "70vh"}}>
+            <FaSpinner className="spinner" style={{fontSize: "40px", color: "#333", animation: "spin 1s linear infinite"}} />
+        </div>
+      </>
+    );
+  }
+  return ( 
+    <> 
+      <Meta title={productState?.title}></Meta>
       <BreadCrumb title={productState?.title} />
       <Container className="main-product-wapper home-wapper py-5">
         <div className="row">
-          <div className="col-6">
+        <div className="col-6">
             <div className="main-product-image">
-            {productState?.images?.length > 0 ? (
               <img
-                src={productState.images[0].url}
-                alt={productState.images[0].public_id}
+                src={mainImage}
+                alt={productState?.images?.[0]?.public_id}
                 className="img-fluid"
               />
-            ) : (
-              <p>Không có ảnh sản phẩm</p>
-            )}
             </div>
             <Swiper
               modules={[Navigation]}
@@ -210,7 +193,11 @@ const SingleProduct = () => {
             >
               {productState?.images?.map((item, index) => (
                 <SwiperSlide key={index}>
-                  <div className="other-product-image">
+                  <div
+                    className="other-product-image"
+                    onClick={() => handleThumbnailClick(item?.url)}
+                    style={{ cursor: "pointer" }}
+                  >
                     <img src={item?.url} alt="product" className="img-fluid" />
                   </div>
                 </SwiperSlide>
@@ -286,15 +273,15 @@ const SingleProduct = () => {
 
                 <div>
                   {productState?.color && (
-                    <div className="d-flex gap-10 flex-column my-2">
+                    <div className="d-flex gap-10 align-items-center my-2">
                       <h3 className="product-heading">Color:</h3>
                       <Color
                         prop={productState?.color}
-                        selectedColor={formik.values.color}
-                        onSelect={(color) => formik.setFieldValue("color", color)}
+                        selectedColor={formik.values.colorId}
+                        onSelect={(color) => formik.setFieldValue("colorId", color)}
                       />
-                      {formik.touched.color && formik.errors.color && (
-                        <div className="text-danger">{formik.errors.color}</div>
+                      {formik.touched.color && formik.errors.colorId && (
+                        <div className="text-danger">{formik.errors.colorId}</div>
                       )}
                     </div>
                   )}
@@ -326,16 +313,13 @@ const SingleProduct = () => {
                 </div>
                 <div className="box-add-cart-buy-now">
                   <div className="d-flex gap-10">
-                    <button onClick={formik.handleSubmit} className="button border-0">Add to Cart</button>
-                    {/* <button to="" className="button border-0">
-                      Buy It Now
-                    </button> */}
+                    <button type="submit" onClick={formik.handleSubmit} className="button border-0">Add to Cart</button> 
                   </div>
                 </div>
                 <div className="d-flex gap-10 alight-items-center mt-4 mb-2 gap-30">
                   <div className="d-flex gap-10 align-items-center">
                     <div className=" text-dark fs-7" onClick={(e) => { addToWishlist(productState?._id); }}>
-                      <img src={wishliststate?.some((product) => product?._id === productState?._id) ? filledWish : wish} alt="wishlist" width={20} /> Wishlist
+                      <img src={wishlist?.some((product) => product?._id === productState?._id) ? filledWish : wish} alt="wishlist" width={20} /> Wishlist
                     </div>
                   </div>
                   <div className="d-flex gap-10 align-items-center" onClick={() => handleAddToCompare(productState?._id)}>
@@ -365,8 +349,7 @@ const SingleProduct = () => {
                 </div>
               </div>
               <div className="d-flex alight-items-center my-2 flex-column">
-                <h3 className="product-heading">Copy Product Link:</h3>
-
+                <h3 className="product-heading">Copy Product Link:</h3> 
                 <button className="copy-clipboard"
                   onClick={() => {
                     copyToClipboard(
@@ -376,16 +359,6 @@ const SingleProduct = () => {
                 >
                   Copy Product Link
                 </button>
-              </div>
-              <div className="d-flex alight-items-center my-2 flex-column">
-                <h3 className="product-heading">Material:</h3>
-                <div>
-                  <p className="product-data mb-0">
-                    Free shipping and returns available on all order Lorem
-                    ipsum, dolor sit amet consectetur adipisicing elit. Culpa,
-                    provident.
-                  </p>
-                </div>
               </div>
             </div>
           </div>
@@ -405,108 +378,7 @@ const SingleProduct = () => {
           </div>
         </Container>
         <Container class1="review-wapper my-3 home-wapper-2">
-          <div className="row">
-            <div className="col-12">
-              <h4 id="review">Đánh giá</h4>
-              <div className="review-inner-wapper">
-                <div className="review-head d-flex justify-content-between align-items-end">
-                  <div>
-                    <h4 className="mb-2">Đánh giá của khách hàng</h4>
-
-                    <div className="d-flex gap-10 align-items-center">
-                      <StarRatings
-                        rating={parseFloat(productState?.totalrating) || 0}
-                        starRatedColor="#ffd700"
-                        numberOfStars={5}
-                        starDimension="15px"
-                        starSpacing="2px"
-                      />
-                      <p className="mb-0">Dựa trên {productState?.ratings?.length} đánh giá</p>
-                    </div>
-                  </div>
-                  {orderedProduct && (
-                    <div>
-                      <a
-                        href="#d"
-                        className="text-dark text-decoration-underline"
-                      >
-                        Viết 1 đánh giá
-                      </a>
-                    </div>
-                  )}
-                </div>
-                <div className="review-form py-4">
-                  <form action="" className="d-flex flex-column gap-20">
-                    <div>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Tên của bạn"
-                      />
-                    </div>
-                    <div>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Email"
-                      />
-                    </div>
-                    <div>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Tiêu đề đánh giá"
-                      />
-                    </div>
-                    <div>
-                      <StarRatings
-                        rating={rating}
-                        starRatedColor="#ffd700"
-                        numberOfStars={5}
-                        starDimension="20px"
-                        starSpacing="3px"
-                        changeRating={handleRatingChange}
-                        edit={true}
-                      />
-                    </div>
-                    <div>
-                      <textarea
-                        type="text"
-                        cols={30}
-                        rows={4}
-                        className="form-control"
-                        placeholder="Nội dung đánh giá"
-                      />
-                    </div>
-                    <button className="button" type="submit">Gửi đánh giá</button>
-                  </form>
-                </div>
-                <div className="reviews mt-3">
-                  {productState?.ratings?.length > 0 ? (
-                    productState.ratings.map((item, index) => (
-                      <div className="review mb-3" key={index}>
-                        <div className="d-flex gap-10 align-items-center">
-                          <h6 className="mb-0">{item?.postedby || "Người dùng ẩn danh"}</h6>
-                          <StarRatings
-                            rating={item?.star || 0}
-                            numberOfStars={5}
-                            starRatedColor="#ffd700"
-                            starDimension="20px"
-                            starSpacing="2px"
-                            name={`rating-${index}`}
-                          />
-                        </div>
-                        <p className="mt-3">{item?.comment}</p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-muted">Chưa có đánh giá nào.</p>
-                  )}
-                </div>
-
-              </div>
-            </div>
-          </div>
+          <ProductReview product={productState} />
         </Container>
         <Container class1="popular-wapper home-wapper-2 mb-5">
           <div className="row">

@@ -1,6 +1,5 @@
-import axios from "axios";
-import { base_url } from "../../utils/base_url";
-import { config } from "../../utils/axiosconfig";
+import axios from "axios";  
+import { getConfig , base_url } from "../../utils/axiosconfig";
 
 const login = async (user) => {
   try {
@@ -18,7 +17,7 @@ const getOrders = async () => {
   try {
     const response = await axios.get(
       `${base_url}user/order/get-all-order`,
-      config
+      getConfig()
     );
     // console.log("Fetched orders:", response.data); // Kiểm tra dữ liệu
     return response.data;
@@ -59,7 +58,7 @@ const register = async (user) => {
 }
 const updateUser = async (values) => {
   try {
-    const response = await axios.put(`${base_url}user/edit-user`, values, config);
+    const response = await axios.put(`${base_url}user/edit-user`, values, getConfig());
     return response.data;
   } catch (error) {
     throw error.response?.data || error;
@@ -67,7 +66,7 @@ const updateUser = async (values) => {
 }
 const deleteUser = async (id) => {
   try {
-    const response = await axios.delete(`${base_url}user/${id}`, config);
+    const response = await axios.delete(`${base_url}user/${id}`, getConfig());
     return response.data;
   } catch (error) {
     throw error.response?.data || error;
@@ -75,23 +74,10 @@ const deleteUser = async (id) => {
 }
 const logout = async () => {
   try {
-    const response = await axios.get(`${base_url}user/logout`, config);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error;
-  }
-}
-const getUsers = async () => {
-  try {
-    const response = await axios.get(`${base_url}user/all-users`, config);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error;
-  }
-}
-const getSingleUser = async (id) => {
-  try {
-    const response = await axios.get(`${base_url}user/${id}`, config);
+    const response = await axios.get(`${base_url}user/logout`, {
+      ...getConfig(),
+      withCredentials: true, 
+    });
     return response.data;
   } catch (error) {
     throw error.response?.data || error;
@@ -99,7 +85,23 @@ const getSingleUser = async (id) => {
 }
 const refreshToken = async () => {
   try {
-    const response = await axios.get(`${base_url}user/refresh`, config);
+    const response = await axios.get(`${base_url}user/refresh`, getConfig());
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+}
+const getUsers = async () => {
+  try {
+    const response = await axios.get(`${base_url}user/all-users`, getConfig());
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+}
+const getSingleUser = async (id) => {
+  try {
+    const response = await axios.get(`${base_url}user/${id}`, getConfig());
     return response.data;
   } catch (error) {
     throw error.response?.data || error;

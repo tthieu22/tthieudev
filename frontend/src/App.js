@@ -23,6 +23,8 @@ import OrderComplete from "./pages/orderComplete";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import AccountPage from "./pages/AccountPage";
+import ResetPassword from "./pages/Resetpassword"; 
+import UserOrdersPage from "./pages/UserOrdersPage";
 function App() {
   return (
     <>
@@ -51,6 +53,8 @@ function App() {
             <Route path="checkout" element={<Checkout />} />
             <Route path="order-complete/:orderCode" element={<OrderComplete />} />
             <Route path="account" element={<AccountPage />} />
+            <Route path="reset-password/:token" element={<ResetPassword />} /> 
+            <Route path="orders" element={<UserOrdersPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

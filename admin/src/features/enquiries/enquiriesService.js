@@ -1,5 +1,5 @@
 import axios from "axios";
-import { base_url } from "../../utils/base_url";
+import {  base_url } from "../../utils/axiosconfig";
 
 // Function to get users
 const getEnquiry = async () => {

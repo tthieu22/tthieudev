@@ -1,11 +1,10 @@
-import axios from "axios";
-import { base_url } from "../../utils/base_url";
-import { config } from "../../utils/axiosconfig";
+import axios from "axios"; 
+import { getConfig, base_url } from "../../utils/axiosconfig";
 
 // Function to get coupons
 const getCoupon = async () => {
   try {
-    const response = await axios.get(`${base_url}coupon`, config);
+    const response = await axios.get(`${base_url}coupon`, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching coupons:", error);
@@ -14,7 +13,7 @@ const getCoupon = async () => {
 };
 const createCoupon = async (couponData) => {
   try {
-    const response = await axios.post(`${base_url}coupon`, couponData, config);
+    const response = await axios.post(`${base_url}coupon`, couponData, getConfig());
     return response.data;
   } catch (error) {
     console.error("Error fetching coupons:", error);

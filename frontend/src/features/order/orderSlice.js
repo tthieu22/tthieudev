@@ -53,6 +53,16 @@ export const getOrderByCode = createAsyncThunk(
         }
     }
 )
+export const getAllOrder = createAsyncThunk(
+    "order/get-all-order",
+    async ( { page , limit , search , status}, thunkAPI) => {
+        try {
+            return await orderService.getAllOrder({ page , limit , search , status});
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+)
 const initialState = {
     orders: [],
     isCreateOrder: null,
@@ -61,6 +71,7 @@ const initialState = {
     isGetOrderNew: null,
     isCancelOrder: null,
     isGetOrderDetail: null,
+    allOrder: null,
     isError: false,
     isLoading: false,
     isSuccess: false,
@@ -175,6 +186,23 @@ export const orderSlice = createSlice({
         state.isSuccess = false;
         state.message = action.payload || "Failed to fetch users";
       })
+      .addCase(getAllOrder.pending, (state) => {
+        state.isLoading = true;
+        state.allOrder = true;
+      })
+      .addCase(getAllOrder.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isError = false;
+        state.isSuccess = true;
+        state.allOrder = false;
+        state.orders = action.payload;
+      })
+      .addCase(getAllOrder.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.isSuccess = false;
+        state.message = action.payload || "Failed to fetch users";
+      });
       
     }
 });
