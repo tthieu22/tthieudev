@@ -1,7 +1,6 @@
-const mongoose = require('mongoose'); // Erase if already required
+const mongoose = require('mongoose');
 
-// Declare the Schema of the Mongo model
-var enqSchema = new mongoose.Schema({
+const enqSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -13,7 +12,6 @@ var enqSchema = new mongoose.Schema({
     mobile: {
         type: String,
         required: true,
-
     },
     comment: {
         type: String,
@@ -22,9 +20,12 @@ var enqSchema = new mongoose.Schema({
     status: {
         type: String,
         default: "Submitted",
-        enum: ["Submitted", "Contacted", "In Progress"]
+        enum: ["Submitted", "Contacted", "In Progress"],
+    },
+    feedback: {
+        type: String,
+        default: "",   
     }
 });
 
-//Export the model
 module.exports = mongoose.model('Enquiry', enqSchema);

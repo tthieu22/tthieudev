@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { MdDeleteForever } from "react-icons/md";
 import CustomModal from "../components/CustomModal"; 
 import { toast } from "react-toastify";
-import { getEnquiries } from "../features/enquiries/enquiriesClice";
+import { getEnquiries , deleteEnquiry ,updateEnquiryFeedback } from "../features/enquiries/enquiriesClice";
 
 const { Option } = Select;
 
@@ -42,15 +42,15 @@ const Enquiries = () => {
 
   const handleDelete = () => {
     setOpen(false);
-    // dispatch(deleteEnquiry(enquiryId))
-    //   .unwrap()
-    //   .then(() => {
-    //     toast.success("Xóa enquiry thành công!");
-    //     dispatch(getEnquiries());
-    //   })
-    //   .catch(() => {
-    //     toast.error("Xóa enquiry thất bại!");
-    //   });
+    dispatch(deleteEnquiry(enquiryId))
+      .unwrap()
+      .then(() => {
+        toast.success("Xóa enquiry thành công!");
+        dispatch(getEnquiries());
+      })
+      .catch(() => {
+        toast.error("Xóa enquiry thất bại!");
+      });
   };
 
   // Mở popup nhập phản hồi
@@ -62,20 +62,20 @@ const Enquiries = () => {
   };
 
   // Xử lý lưu phản hồi
-  const handleFeedbackOk = () => {
+  const handleFeedbackOk = async () => {
     if (!feedbackText.trim()) {
       toast.error("Vui lòng nhập phản hồi!");
       return;
     }
-    setFeedbackModalVisible(false);
-    // Ở đây bạn thực hiện cập nhật trạng thái và phản hồi lên server
-    // Ví dụ:
-    // dispatch(updateEnquiryFeedback({ id: selectedEnquiry._id, status: selectedStatus, feedback: feedbackText }))
-    //   .then(() => {
-    //     toast.success("Cập nhật thành công");
-    //     dispatch(getEnquiries());
-    //   })
-    //   .catch(() => toast.error("Cập nhật thất bại"));
+    setFeedbackModalVisible(false); 
+    const data = await dispatch(updateEnquiryFeedback({ id: selectedEnquiry._id, status: selectedStatus, feedback: feedbackText }));
+    console.log(data);
+    if (data?.payload?.status === "success") {
+      toast.success("Phản hồi thành cong!");
+    } else {
+      toast.error("Phản hồi thất bại!");
+    }
+    
   };
 
   const handleFeedbackCancel = () => {
@@ -142,16 +142,16 @@ const Enquiries = () => {
       title: "Status",
       dataIndex: "status",
       sorter: (a, b) => a.status.localeCompare(b.status),
-      render: (_, record) => {
+      render: (_, record) => { 
         const enq = record.enquiryObj;
+    
         return (
           <Select
-            value={record.status}
-            disabled={record.status === "In Progress"}
+            value={enq.status}
+            disabled={enq.status === "In Progress"}
             style={{ width: 140 }}
             onChange={(value) => {
               if (value === "In Progress") {
-                // không cho chọn vì đã phản hồi
                 toast.info("Enquiry đã được phản hồi, không thể thay đổi trạng thái.");
                 return;
               }
@@ -164,7 +164,7 @@ const Enquiries = () => {
           </Select>
         );
       },
-    },
+    }, 
     {
       title: "Action",
       dataIndex: "action",

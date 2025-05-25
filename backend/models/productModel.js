@@ -22,6 +22,11 @@ var productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    originalPrice: {        
+      type: Number,
+      required: false,       
+      default: 0,
+    },
     category: {
       type: String,
       required: true,
@@ -47,6 +52,10 @@ var productSchema = new mongoose.Schema(
     },
     color: [String],
     tags: [String],
+    specialDateTime: {       
+      type: Date,
+      required: false,
+    },
     ratings: [
       {
         star: Number,

@@ -6,7 +6,7 @@ import BreadCrumb from "../components/BreadCrumb";
 import Meta from "../components/Meta";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Container from "../components/Container";
-
+import { Link } from "react-router-dom";
 
 const UserOrdersPage = () => {
   const dispatch = useDispatch();
@@ -162,6 +162,7 @@ const UserOrdersPage = () => {
                   <h5 className="order-code mb-0">
                     Mã đơn hàng: <span>{orderCode}</span>
                   </h5>
+                  
                   <span
                     className={`badge order-status ${
                       orderStatus?.toLowerCase().includes("đã") ? "bg-success" : "bg-warning text-dark"
@@ -235,14 +236,20 @@ const UserOrdersPage = () => {
                 )}
 
                 <h6 className="mt-4 mb-2">Thông tin giao hàng:</h6>
-                <p className="mb-1 shipping-info">
-                  <strong>{shippingAddress?.fullName || "Không rõ"}</strong> - {shippingAddress?.phone || "Không có SĐT"}
-                </p>
-                <p className="mb-0">
-                  {[shippingAddress?.address, shippingAddress?.district, shippingAddress?.city, shippingAddress?.country]
-                    .filter(Boolean)
-                    .join(", ")}
-                </p>
+                <div className="d-flex justify-content-between"> 
+                  <div className="content">
+                    <p className="mb-1 shipping-info">
+                      <strong>{shippingAddress?.fullName || "Không rõ"}</strong> - {shippingAddress?.phone || "Không có SĐT"}
+                    </p>
+                    <p className="mb-0">
+                      {[shippingAddress?.address, shippingAddress?.district, shippingAddress?.city, shippingAddress?.country]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </p>
+                  </div>
+                  
+                   <Link to={`/order-complete/${order.orderCode}`} className="text-white button d-flex align-items-center">Xem chi tiết</Link>
+                </div>
               </div>
             );
           })

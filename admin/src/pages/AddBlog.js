@@ -30,14 +30,11 @@ const AddBlog = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const getBlogId = location.pathname.split("/")[3];
-
-  const imagestate = useSelector((state) => state.upload.images);
-  const categorystate = useSelector((state) => state.blogcategory.blogcategories);
-  const newBlog = useSelector((state) => state.blog);
-  const { isSuccess, isError, createblog, singleBlog, updateImage, deleteImage, updateBlog } = newBlog || {};
+  const getBlogId = location.pathname.split("/")[3]; 
+  const { isSuccess, isError, createblog, updateImage, deleteImage, updateBlog } = useSelector((state) => state.blog)|| {};
 
   const [images, setImages] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [initialValues, setInitialValues] = useState({
     title: "",
     description: "",
@@ -46,31 +43,43 @@ const AddBlog = () => {
   });
 
   useEffect(() => {
-    dispatch(getBlogCategorys());
-    if (getBlogId) dispatch(getaBlog(getBlogId));
+    const fetchData = async () => {
+      try { 
+        const categoryAction = await dispatch(getBlogCategorys());
+        if (getBlogCategorys.fulfilled.match(categoryAction)) {
+          setCategories(categoryAction.payload);
+        }
+ 
+        if (getBlogId) {
+          const blogAction = await dispatch(getaBlog(getBlogId));
+          if (getaBlog.fulfilled.match(blogAction)) {
+            const blog = blogAction.payload;
+            console.log("blog", blog);
+            
+            setImages(blog.images || []);
+            setInitialValues({
+              title: blog.title || "",
+              description: blog.description || "",
+              category: blog.category || "",
+              images: blog.images || [],
+            });
+          }
+        } else { 
+          setImages([]);
+          setInitialValues({
+            title: "",
+            description: "",
+            category: "",
+            images: [],
+          });
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu blog:", error);
+      }
+    };
+
+    fetchData();
   }, [dispatch, getBlogId]);
-
-  useEffect(() => {
-    if (getBlogId && singleBlog) {
-      setInitialValues({
-        title: singleBlog.title || "",
-        description: singleBlog.description || "",
-        category: singleBlog.category || "",
-        images: singleBlog.images || [],
-      });
-      setImages(singleBlog.images || []);
-    }
-  }, [getBlogId, singleBlog]);
-
-  useEffect(() => {
-    if (!getBlogId && imagestate?.length > 0) {
-      const imgs = imagestate.map((i, index) => ({
-        public_id: i.public_id + "_" + index,
-        url: i.url,
-      }));
-      setImages(imgs);
-    }
-  }, [imagestate, getBlogId]);
 
   useEffect(() => {
     if (isSuccess && createblog) toast.success("Bài viết đã được thêm thành công!");
@@ -102,23 +111,56 @@ const AddBlog = () => {
     if (formik.values.images !== images) {
       formik.setFieldValue("images", images);
     }
-  }, [images, formik]);
-
-  const handleUploadImages = (files) => {
-    if (getBlogId) {
-      dispatch(uploadBlogImages({ id: getBlogId, data: files  }));
-    } else {
-      dispatch(uploadImg(files));
+  }, [images, formik]); 
+  
+  const handleUploadImages = async (files) => {
+    try {
+      let result;
+  
+      if (getBlogId) { 
+        result = await dispatch(uploadBlogImages({ id: getBlogId, data: files }));
+      } else {
+        result = await dispatch(uploadImg(files));
+      }
+  
+      if (result?.payload) {
+        const imagesArray = Array.isArray(result.payload.images) ? result.payload.images : [];
+        setImages(imagesArray);
+        toast.success("Upload ảnh thành công!");
+      } else {
+        console.error("Upload failed:", result);
+        toast.error("Upload ảnh thất bại!");
+      }
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      toast.error("Lỗi khi upload ảnh!");
     }
   };
+  
+    
+  const handleDeleteImage = async (publicId) => {
+    try {
+      let result;
 
-  const handleDeleteImage = (publicId) => {
-    if (getBlogId) {
-      dispatch(deleteBlogImages(publicId));
-    } else {
-      dispatch(deleteImg(publicId));
+      if (getBlogId) {
+        result = await dispatch(deleteBlogImages(publicId));
+      } else {
+        result = await dispatch(deleteImg(publicId));
+      }
+
+      if (result?.meta?.requestStatus === "fulfilled") { 
+        setImages((prevImages) =>
+          prevImages.filter((img) => img.public_id !== publicId)
+        );
+        toast.success("Xóa ảnh thành công!");
+      } else {
+        console.error("Delete failed:", result);
+        toast.error("Xóa ảnh thất bại!");
+      }
+    } catch (error) {
+      console.error("Error deleting image:", error);
+      toast.error("Lỗi khi xóa ảnh!");
     }
-    setImages((prev) => prev.filter((img) => img.public_id !== publicId));
   };
 
   return (
@@ -143,7 +185,7 @@ const AddBlog = () => {
             value={formik.values.category}
           >
             <option value="" disabled>Chọn danh mục</option>
-            {categorystate.map((item) => (
+            {categories.map((item) => (
               <option value={item.title} key={item._id}>{item.title}</option>
             ))}
           </select>

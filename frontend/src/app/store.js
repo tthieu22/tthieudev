@@ -1,5 +1,4 @@
-import { configureStore } from "@reduxjs/toolkit";
-import counterReducer from "../features/counter/counterSlice";
+import { configureStore } from "@reduxjs/toolkit"; 
 import authReducer from "../features/user/userSlice";
 import productReducer from "../features/product/productSlice";
 import blogReducer from "../features/blogs/blogSlice";
@@ -10,8 +9,7 @@ import chatbotReducer from "../features/chatbot/chatbotSlice";
 import enquiryReducer from "../features/enquirry/enquirySlice";
 
 export const store = configureStore({
-  reducer: {
-    counter: counterReducer,
+  reducer: { 
     auth: authReducer,
     product: productReducer,
     blog: blogReducer,

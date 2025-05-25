@@ -212,11 +212,18 @@ const SingleProduct = () => {
                 </h3>
                 </div>
                 <div className="border-bottom py-3 price">
-                  <p>{productState?.price
+                <div className="d-flex gap-30 align-items-center">
+                  <p className="fs-3">
+                  {productState?.price
                     ? Number(productState.price).toLocaleString("vi-VN") + " ₫"
                     : "Đang cập nhật giá"}
                   </p>
-
+                  <p>
+                    {productState?.originalPrice && (
+                      <strike>{Number(productState?.originalPrice).toLocaleString("vi-VN") + " ₫"}</strike>
+                    )}
+                  </p>
+                </div>
                 <div className="d-flex gap-10 align-items-center">
                     <StarRatings
                       rating={parseFloat(productState?.totalrating) || 0}

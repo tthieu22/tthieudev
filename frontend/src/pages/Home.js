@@ -6,25 +6,28 @@ import Meta from "../components/Meta";
 import Container from "../components/Container";
 import { services } from "../utils/Data";
 import { getAllBlog } from "../features/blogs/blogSlice";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import moment from "moment";
 import { getAllProduct } from "../features/product/productSlice";
 import BannerSection from "../components/BannerSection";
 import BrandMarquee from "../components/BrandMarquee";
 import FamousCard from "../components/FamousCard";
-import { FaSpinner } from "react-icons/fa";
+import { FaSpinner } from "react-icons/fa"; 
 
 const Home = () => {
-  const dispatch = useDispatch();
-  const blogstate = useSelector((state) => state.blog?.blog);
-  const products = useSelector((state) => state.product?.product);
+  const dispatch = useDispatch(); 
+  const [products, setProducts] = useState([]);
+  const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      await dispatch(getAllBlog());
-      await dispatch(getAllProduct());
+      const responseBlog = await dispatch(getAllBlog());
+      const productResponse = await dispatch(getAllProduct()); 
+
+      setProducts(productResponse?.payload);
+      setBlogs(responseBlog?.payload); 
       setLoading(false);
     };
     fetchData();
@@ -36,7 +39,7 @@ const Home = () => {
   const mainBannerData = products?.filter((item) => item?.tags?.includes("SUPPERCHARGED")).slice(0, 4);
   const smallBannerData = products?.filter((item) => item?.tags?.includes("Sale")).slice(0, 4);
   const famousProducts = products?.filter((item) => item?.tags?.includes("Famous")).slice(0, 4);
-
+   
   if (loading) {
     return (
       <>  
@@ -52,7 +55,6 @@ const Home = () => {
       <div className="banner-gadient">
         <BannerSection mainBannerData={mainBannerData} smallBannerData={smallBannerData} />
       </div>
-
       <div className="home-wapper-2 py-4 px-5">
         <div className="service d-flex align-items-center justify-content-between">
           {services?.map((i, j) => (
@@ -96,6 +98,8 @@ const Home = () => {
               sold={item?.sold}
               quantity={item?.quantity}
               images={item?.images}
+              specialDateTime={item?.specialDateTime}
+              originalPrice={item?.originalPrice}
             />
           ))}
         </div>
@@ -119,7 +123,7 @@ const Home = () => {
           <div className="col-12">
             <h3 className="section-heading">Blog mới nhất của chúng tôi</h3>
           </div>
-          {blogstate?.map((item, index) => {
+          {blogs?.map((item, index) => {
             if (index < 4) {
               return (
                 <BlogCard

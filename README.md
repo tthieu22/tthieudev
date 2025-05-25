@@ -22,6 +22,11 @@ Dự án demo là hệ thống quản lý sản phẩm và đơn hàng tối ưu
 
 Giao diện admin hiện còn đơn giản, một số tính năng chưa hoàn thiện, nhưng các chức năng cốt lõi đã hoàn thành để vận hành hệ thống hiệu quả.
 
+## Tài khoản truy cập admin 
+
+   Email: hietrng202@gmail.com
+   Password: admin
+   
 ## Tính năng frontend dành cho người dùng
 
 - Hiển thị sản phẩm theo danh mục, hỗ trợ lọc và tìm kiếm nhanh.

@@ -1,11 +1,11 @@
 const multer = require("multer");
 const sharp = require("sharp");
-const path = require("path");
 const asyncHandler = require("express-async-handler");
-const fs = require("fs");
 
+// Sử dụng bộ nhớ tạm (RAM)
 const multerStorage = multer.memoryStorage();
 
+// Lọc file chỉ cho phép ảnh
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
     cb(null, true);
@@ -14,87 +14,21 @@ const multerFilter = (req, file, cb) => {
   }
 };
 
+// Cấu hình upload ảnh
 const uploadPhoto = multer({
   storage: multerStorage,
   fileFilter: multerFilter,
-  limits: { fileSize: 2000000 },
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
 });
 
+// Middleware resize ảnh dùng cho sản phẩm
 const productImgResize = asyncHandler(async (req, res, next) => {
   try {
     if (!req.files) return next();
 
-    const dir = path.join(__dirname, "../public/images/products");
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    const filenames = [];
-
     await Promise.all(
       req.files.map(async (file, index) => {
-        const timestamp = Date.now();
-        const filename = `product-${timestamp}-${index}.jpeg`;
-        const filePath = path.join(dir, filename);
-
-        await sharp(file.buffer)
-          .resize(300, 300)
-          .toFormat("jpeg")
-          .jpeg({ quality: 90 })
-          .toFile(filePath);
-
-        filenames.push(filename);
-      })
-    );
-
-    req.savedFilenames = filenames;
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
-
-const blogImgResize = asyncHandler(async (req, res, next) => {
-  try {
-    if (!req.files) return next();
-
-    const dir = path.join(__dirname, "../public/images/blogs");
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    const filenames = [];
-
-    await Promise.all(
-      req.files.map(async (file, index) => {
-        const timestamp = Date.now();
-        const filename = `blog-${timestamp}-${index}.jpeg`;
-        const filePath = path.join(dir, filename);
-
-        await sharp(file.buffer)
-          .resize(300, 300)
-          .toFormat("jpeg")
-          .jpeg({ quality: 90 })
-          .toFile(filePath);
-
-        filenames.push(filename);
-      })
-    );
-
-    req.savedFilenames = filenames;
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Middleware resize ảnh cho Cloudinary upload
-const cloudImgResize = asyncHandler(async (req, res, next) => {
-  try {
-    if (!req.files) return next();
-
-    await Promise.all(
-      req.files.map(async (file, index) => {
+        file.originalname = `product-${Date.now()}-${index}.jpeg`;
         file.buffer = await sharp(file.buffer)
           .resize(300, 300)
           .toFormat("jpeg")
@@ -109,4 +43,53 @@ const cloudImgResize = asyncHandler(async (req, res, next) => {
   }
 });
 
-module.exports = { uploadPhoto, productImgResize, blogImgResize, cloudImgResize };
+// Middleware resize ảnh dùng cho blog
+const blogImgResize = asyncHandler(async (req, res, next) => {
+  try {
+    if (!req.files) return next();
+
+    await Promise.all(
+      req.files.map(async (file, index) => {
+        file.originalname = `blog-${Date.now()}-${index}.jpeg`;
+        file.buffer = await sharp(file.buffer)
+          .resize(300, 300)
+          .toFormat("jpeg")
+          .jpeg({ quality: 90 })
+          .toBuffer();
+      })
+    );
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Middleware resize ảnh cho Cloudinary (có thể dùng chung)
+const cloudImgResize = asyncHandler(async (req, res, next) => {
+  try {
+    if (!req.files) return next();
+
+    await Promise.all(
+      req.files.map(async (file, index) => {
+        file.originalname = `cloud-${Date.now()}-${index}.jpeg`;
+        file.buffer = await sharp(file.buffer)
+          .resize(300, 300)
+          .toFormat("jpeg")
+          .jpeg({ quality: 90 })
+          .toBuffer();
+      })
+    );
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+module.exports = {
+  uploadPhoto,
+  productImgResize,
+  blogImgResize,
+  cloudImgResize,
+};

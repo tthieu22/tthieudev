@@ -1,6 +1,7 @@
 const Enquiry = require("../models/enqModel")
 const asyncHandler = require("express-async-handler")
 const { validateMongodbId } = require("../utils/validateMongodbId")
+const { sendEmail } = require("./emailCtrl");
 
 const createEnquiry = asyncHandler(async (req, res) => {
     try {
@@ -13,15 +14,38 @@ const createEnquiry = asyncHandler(async (req, res) => {
 })
 const updateEnquiry = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    validateMongodbId(id)
-    try {
-        const updateEnquiry = await Enquiry.findByIdAndUpdate(id, req.body, { new: true });
-        res.json(updateEnquiry)
+    validateMongodbId(id);
+
+    const { status, feedback } = req.body;
+
+    try { 
+        let updatedEnquiry = await Enquiry.findByIdAndUpdate(
+            id,
+            { status, feedback },
+            { new: true }
+        );
+
+        res.json(updatedEnquiry);
+
+        if (updatedEnquiry?.email) {
+            await sendEmail({
+                to: updatedEnquiry.email,
+                subject: "Phản hồi yêu cầu tư vấn",
+                text: `Xin chào ${updatedEnquiry.name || "quý khách"},\n\nTrạng thái yêu cầu của bạn: "${status}".\nPhản hồi: ${feedback}\n\nTrân trọng,\nĐội ngũ hỗ trợ.`,
+            });
+ 
+            updatedEnquiry = await Enquiry.findByIdAndUpdate(
+                id,
+                { status: "In Progress" },
+                { new: true }
+            );
+        }
 
     } catch (error) {
-        throw new Error(error)
+        throw new Error(error);
     }
-})
+});
+
 const deleteEnquiry = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongodbId(id);
@@ -33,6 +57,7 @@ const deleteEnquiry = asyncHandler(async (req, res) => {
         throw new Error(error)
     }
 })
+
 const getaEnquiry = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongodbId(id);
