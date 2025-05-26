@@ -26,6 +26,7 @@ Giao diện admin hiện còn đơn giản, một số tính năng chưa hoàn t
 
    Email: hietrng202@gmail.com
    Password: admin
+   
    (Đây là dự án em tự phát triển nên không tránh khỏi được các lỗi phát sinh trong quá trình review. Mong các anh chị thông cảm ạ! Phần user các anh chị đăng nhập để trải nghiệm hết các tính năng ạ. Em xin chân thành cảm ơn. )
 ## Tính năng frontend dành cho người dùng
 
