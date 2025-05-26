@@ -3,16 +3,35 @@ import productService from "./productService";
 
 // Get all products
 export const getProducts = createAsyncThunk(
-  "product/get-products",
-  async (_, thunkAPI) => {
+  "product/get-all-product",
+  async ({ page = 1, limit = 10 }, thunkAPI) => {
     try {
-      return await productService.getProducts();
+      return await productService.getProducts({ page, limit });
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message || error);
+      const message =
+        error.response && error.response.data
+          ? error.response.data
+          : error.message;
+      return thunkAPI.rejectWithValue(message);
     }
   }
 );
 
+
+export const getProductsWithMeta = createAsyncThunk(
+  "product/get-products-with-meta",
+  async (params, thunkAPI) => {
+    try {
+      return await productService.getProductsWithMeta(params);
+    } catch (error) {
+      const message =
+        error.response && error.response.data
+          ? error.response.data
+          : error.message;
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
 // Create a new product
 export const createProduct = createAsyncThunk(
   "product/create-product",
@@ -201,6 +220,19 @@ export const productSlice = createSlice({
         state.deletedProduct = action.payload;
       })
       .addCase(deleteaProduct.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      .addCase(getProductsWithMeta.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getProductsWithMeta.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.products = action.payload;
+      })
+      .addCase(getProductsWithMeta.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;

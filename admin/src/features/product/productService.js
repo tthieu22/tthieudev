@@ -2,15 +2,19 @@ import axios from "axios";
 import { getConfig, base_url } from "../../utils/axiosconfig";
 
 // Function to get all products
-const getProducts = async () => {
+const getProducts = async ({ page = 1, limit = 10 }) => {
   try {
-    const response = await axios.get(`${base_url}product`, getConfig());
-    return response.data;
+    const response = await axios.get(`${base_url}product`, {
+      params: { page, limit },
+    });
+    return response.data;  
   } catch (error) {
-    console.error("Error fetching products:", error);
-    throw error.response?.data || error;
+    throw error.response && error.response.data
+      ? error.response.data
+      : error.message;
   }
 };
+
 // Function to create a new product
 const createProduct = async (product) => {
   try {
@@ -80,6 +84,15 @@ const deleteProduct = async (id) => {
   }
 };
 
+const getProductsWithMeta = async (params = {}) => {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const response = await axios.get(`${base_url}product/infinite?${query}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
 const productService = {
   getProducts,
   createProduct,
@@ -88,6 +101,7 @@ const productService = {
   getaProduct,
   updateProduct,
   deleteProduct,
+  getProductsWithMeta
 };
 
 export default productService;

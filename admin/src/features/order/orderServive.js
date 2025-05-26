@@ -66,4 +66,12 @@ const updateOrderStatus = async (orderId, status) => {
         throw error.response?.data || error;
     }
 }
+export const deleteOrder = async (orderId) => {
+    try {
+        const response = await axios.delete(`${base_url}order/delete-order/${orderId}`, getConfig());
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error;
+    }
+}
 export const orderService = { getOrderDetail, createOrder, getOrderNew , cancelOrder, createVNPayUrl,getOrderByCode,updateOrderStatus};

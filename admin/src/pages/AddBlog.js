@@ -121,11 +121,11 @@ const AddBlog = () => {
         result = await dispatch(uploadBlogImages({ id: getBlogId, data: files }));
       } else {
         result = await dispatch(uploadImg(files));
-      }
-  
+      } 
+
       if (result?.payload) {
-        const imagesArray = Array.isArray(result.payload.images) ? result.payload.images : [];
-        setImages(imagesArray);
+        const imagesArray = Array.isArray(result.payload) ? result.payload : [];
+        setImages(imagesArray); 
         toast.success("Upload ảnh thành công!");
       } else {
         console.error("Upload failed:", result);

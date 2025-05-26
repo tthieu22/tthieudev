@@ -1,56 +1,45 @@
 import { useEffect, useState, useMemo } from "react";
 import { Table, Input, Select, Button, Row, Col, Space } from "antd";
-import { useDispatch, useSelector } from "react-redux";
-import { getProducts, deleteaProduct } from "../features/product/productClice";
+import { useDispatch } from "react-redux";
+import { getProductsWithMeta } from "../features/product/productClice";
 import { Link } from "react-router-dom";
-import { MdDeleteForever } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
-import CustomModal from "../components/CustomModal";
 import { toast } from "react-toastify";
 
 const { Option } = Select;
 
 const Productlist = () => {
   const dispatch = useDispatch();
-  const productStateRaw = useSelector((state) => state.product.products || []);
-  const productState = useMemo(() => productStateRaw, [productStateRaw]);
 
-  const [open, setOpen] = useState(false);
-  const [productId, setProductId] = useState("");
-
+  const [products, setProducts] = useState([]);
+  const [totalProducts, setTotalProducts] = useState(0); 
   const [searchTitle, setSearchTitle] = useState("");
   const [filteredCategory, setFilteredCategory] = useState("");
+  
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(8);
 
   const categories = useMemo(() => {
-    const unique = new Set(productState.map((p) => p.category));
+    const unique = new Set(products.map((p) => p.category));
     return [...unique];
-  }, [productState]);
+  }, [products]);
 
+  // Fetch data
   useEffect(() => {
-    dispatch(getProducts());
-  }, [dispatch]);
+    const fetchProducts = async () => {
+      try {
+        const response = await dispatch(getProductsWithMeta({ page, limit: pageSize }));  
+        setProducts( response.payload.products || []);
+        setTotalProducts(response.payload?.totalProducts || 0);
+      } catch (error) {
+        toast.error("Không thể tải sản phẩm!");
+      }
+    };
 
-  const showModal = (id) => {
-    setOpen(true);
-    setProductId(id);
-  };
+    fetchProducts();
+  }, [dispatch, page, pageSize]);
 
-  const hideModal = () => setOpen(false);
-
-  const handleDeleteProduct = (id) => {
-    setOpen(false);
-    dispatch(deleteaProduct(id))
-      .unwrap()
-      .then(() => {
-        toast.success("Xoá sản phẩm thành công!");
-        dispatch(getProducts());
-      })
-      .catch(() => {
-        toast.error("Xoá sản phẩm thất bại!");
-      });
-  };
-
-  const filteredData = productState
+  const filteredData = products
     .filter((product) =>
       product.title.toLowerCase().includes(searchTitle.toLowerCase().trim())
     )
@@ -59,7 +48,7 @@ const Productlist = () => {
     )
     .map((product, index) => ({
       key: product._id,
-      index: index + 1,
+      index: (page - 1) * pageSize + index + 1,
       title: product.title,
       quantity: product.quantity,
       price: `$${product.price}`,
@@ -72,12 +61,6 @@ const Productlist = () => {
           <Link to={`/admin/product/${product._id}`} className="text-dark">
             <FaEdit className="fs-5" />
           </Link>
-          <Button
-            type="text"
-            danger
-            onClick={() => showModal(product._id)}
-            icon={<MdDeleteForever className="fs-5" />}
-          />
         </Space>
       ),
     }));
@@ -115,28 +98,28 @@ const Productlist = () => {
     {
       title: "Màu sắc",
       dataIndex: "color",
-      sorter: (a, b) => a.color.localeCompare(b.color),
+      sorter: (a, b) => a.color?.[0]?.localeCompare(b.color?.[0] || ""),
       render: (color) => (
         <div>
-        {color.map((color, idx) => (
-          <div
-            key={idx}
-            style={{ display: "flex", alignItems: "center", marginBottom: 8 }}
-          >
+          {color.map((c, idx) => (
             <div
-              style={{
-                width: 20,
-                height: 20,
-                backgroundColor: color,
-                border: "1px solid #ccc",
-                borderRadius: 4,
-                marginRight: 8,
-              }}
-            />
-            <span>{color}</span>
-          </div>
-        ))}
-      </div>
+              key={idx}
+              style={{ display: "flex", alignItems: "center", marginBottom: 8 }}
+            >
+              <div
+                style={{
+                  width: 20,
+                  height: 20,
+                  backgroundColor: c,
+                  border: "1px solid #ccc",
+                  borderRadius: 4,
+                  marginRight: 8,
+                }}
+              />
+              <span>{c}</span>
+            </div>
+          ))}
+        </div>
       ),
     },
     {
@@ -161,11 +144,15 @@ const Productlist = () => {
     setFilteredCategory("");
   };
 
+  const handleTableChange = (pagination) => {
+    setPage(pagination.current);
+    setPageSize(pagination.pageSize);
+  };
+
   return (
     <div style={{ padding: 24, backgroundColor: "#fff", borderRadius: 6 }}>
       <h3 className="mb-4 title">Quản lý sản phẩm</h3>
 
-      {/* Filter bar */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={8} lg={6}>
           <Input.Search
@@ -200,25 +187,22 @@ const Productlist = () => {
         </Col>
       </Row>
 
-      {/* Bảng dữ liệu */}
       <Table
         columns={columns}
         dataSource={filteredData}
-        pagination={{ pageSize: 8 }}
+        pagination={{
+          current: page,
+          pageSize: pageSize,
+          showSizeChanger: true,
+          pageSizeOptions: ["8", "16", "32", "64"],
+          total: totalProducts,
+        }}
+        onChange={handleTableChange}
         rowKey="key"
         bordered
         scroll={{ x: "max-content" }}
       />
 
-      {/* Modal xác nhận xoá */}
-      <CustomModal
-        hideModal={hideModal}
-        open={open}
-        performAction={() => handleDeleteProduct(productId)}
-        title="Bạn có chắc chắn muốn xóa sản phẩm này không?"
-        btnTitle="Xóa sản phẩm"
-        performActionBtn="Xóa sản phẩm"
-      />
     </div>
   );
 };

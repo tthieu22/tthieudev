@@ -24,7 +24,7 @@ const Home = () => {
     const fetchData = async () => {
       setLoading(true);
       const responseBlog = await dispatch(getAllBlog());
-      const productResponse = await dispatch(getAllProduct()); 
+      const productResponse = await dispatch(getAllProduct({ limit: 30 })); 
 
       setProducts(productResponse?.payload);
       setBlogs(responseBlog?.payload); 

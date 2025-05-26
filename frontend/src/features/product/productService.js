@@ -1,9 +1,11 @@
 import axios from "axios";
 import { base_url, getConfig } from "../../utils/axiosConfig";
 
-const getProducts = async () => {
+const getProducts = async ({ limit }) => {
   try {
-    const response = await axios.get(`${base_url}product/`);
+    const response = await axios.get(`${base_url}product/`, {
+      params: { limit },
+    });
     return response.data;
   } catch (error) {
     throw error.response && error.response.data
