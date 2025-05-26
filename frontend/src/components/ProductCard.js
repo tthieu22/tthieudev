@@ -70,7 +70,7 @@ const ProductCard = ({ grid, data }) => {
     <>
       {data?.map((item, index) => {
         return (
-          <div className={columnClasses} key={index} >
+          <div className={`${columnClasses} full-card`} key={index} >
             <div className="w-100 ">
               <div className="product-card position-relative  h-100" >
                 <div className="wishlist-icon position-absolute">
@@ -112,8 +112,7 @@ const ProductCard = ({ grid, data }) => {
                   )}
                   <div className="product-details">
                     <h6 className="brand">{item?.brand}</h6>
-                    <h5 className="product-title">{item?.title}</h5>
-                    <br />
+                    <h5 className="product-title">{item?.title}</h5> 
                     <StarRatings
                       rating={parseFloat(item?.totalrating) || 0}
                       starRatedColor="#ffd700"

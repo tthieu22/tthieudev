@@ -18,14 +18,14 @@ const Footer = () => {
       {/* Section: Newsletter */}
       <footer className="py-3 bg-light border-top">
         <div className="container-xxl">
-          <div className="row align-items-center">
-            <div className="col-5">
+          <div className="row align-items-center content-footer-top">
+            <div className=" col-12 col-md-5 col-lg-5 col-xl-5 col-xxl-5">
               <div className="footer-top-data d-flex gap-3 align-items-center">
                 <HiOutlineMail className="fs-1 text-primary text-dark" />
                 <h2 className="mb-0 text-dark">Sign Up for Newsletter</h2>
               </div>
             </div>
-            <div className="col-7">
+            <div className="col-12 col-md-7 col-lg-7 col-xl-7 col-xxl-7">
               <div className="input-group">
                 <input
                   type="text"
@@ -46,8 +46,8 @@ const Footer = () => {
       {/* Section: Footer Main */}
       <footer className="py-4 bg-white border-top">
         <div className="container-xxl">
-          <div className="row">
-            <div className="col-4">
+          <div className="row row-content">
+            <div className="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 col-xxl-3">
               <h4 className="text-dark mb-4">Contact Us</h4>
               <p className="text-dark fs-6 mb-1">
                 <BsGeoAlt className="me-2" />
@@ -70,7 +70,7 @@ const Footer = () => {
               </div>
             </div>
 
-            <div className="col-3">
+            <div className="col-12 col-sm-6 col-md-3 col-lg-3 col-xl-3 col-xxl-3">
               <h4 className="text-dark mb-4">Information</h4>
               <div className="footer-links d-flex flex-column">
                 <Link to="/privacy-policy" className="text-dark mb-1">Privacy Policy</Link>
@@ -81,7 +81,7 @@ const Footer = () => {
               </div>
             </div>
 
-            <div className="col-3">
+            <div className="col-12 col-sm-6 col-md-3 col-lg-3 col-xl-3 col-xxl-3">
               <h4 className="text-dark mb-4">Account</h4>
               <div className="footer-links d-flex flex-column">
                 <Link className="text-dark mb-1" to="#">Search</Link>
@@ -92,7 +92,7 @@ const Footer = () => {
               </div>
             </div>
 
-            <div className="col-2">
+            <div className="col-12 col-sm-6 col-md-2 col-lg-3 col-xl-3 col-xxl-3">
               <h4 className="text-dark mb-4">Quick Links</h4>
               <div className="footer-links d-flex flex-column">
                 <Link className="text-dark mb-1" to="#">Accessories</Link>

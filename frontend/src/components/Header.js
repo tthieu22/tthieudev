@@ -39,8 +39,8 @@ const Header = () => {
         {/* Main Header */}
         <header className="py-3 border-bottom">
           <div className="container-xxl">
-            <div className="row align-items-center">
-              <div className="col-6 col-md-2">
+            <div className="row align-items-center logo-container">
+              <div className="col-12 col-md-2">
                 <h2 className="mb-0 site-logo">
                   <Link className="text-decoration-none" to="/">
                     tthieu.dev
@@ -65,7 +65,7 @@ const Header = () => {
               </div>
 
               <div className="col-12 col-md-5">
-                <div className="d-flex align-items-center justify-content-end gap-30">
+                <div className="d-flex align-items-center justify-content-end gap-30 wish-box">
                   <Link to="/compare-product" className="d-flex align-items-center gap-2 text-dark text-decoration-none nav-item-icon">
                     <BsBarChart size={20} className="text-dark" />
                     <span className="nav-text">So sánh</span>
@@ -99,8 +99,8 @@ const Header = () => {
         <div className="bg-white">
           <div className="container-xxl">
             <div className="row">
-              <div className="col-12 d-flex align-items-center">
-                <div className="d-flex gap-10">
+              <div className="col-12 d-flex align-items-center content-main-menu">
+                <div className="d-flex gap-10 content ">
                   <NavLink
                     to="/"
                     className={({ isActive }) =>
@@ -141,7 +141,7 @@ const Header = () => {
       </div>
 
       {/* Padding for fixed header */}
-      <div style={{ paddingTop: "120px" }}></div>
+      <div className="padding-header" style={{ paddingTop: "120px" }}></div>
     </>
   );
 };

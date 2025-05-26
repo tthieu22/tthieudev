@@ -55,7 +55,7 @@ const Home = () => {
       <div className="banner-gadient">
         <BannerSection mainBannerData={mainBannerData} smallBannerData={smallBannerData} />
       </div>
-      <div className="home-wapper-2 py-4 px-5">
+      <div className="home-wapper-2 py-4 px-5 garented-service">
         <div className="service d-flex align-items-center justify-content-between">
           {services?.map((i, j) => (
             <div key={i.id || j} className="d-flex align-items-center gap-15">
@@ -87,6 +87,7 @@ const Home = () => {
           <div className="col-12">
             <h3 className="section-heading">Sản phẩm đặc biệt</h3>
           </div>
+          <div className="d-grid content-special-product">
           {specialProducts?.map((item) => (
             <SpecialProduct
               key={item?._id}
@@ -102,6 +103,7 @@ const Home = () => {
               originalPrice={item?.originalPrice}
             />
           ))}
+          </div>
         </div>
       </Container>
 

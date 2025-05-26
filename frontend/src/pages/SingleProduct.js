@@ -48,7 +48,7 @@ const SingleProduct = () => {
       setLoading(true); 
 
       const productAction = await dispatch(getAproduct(productId));
-      const allProductAction = await dispatch(getAllProduct());
+      const allProductAction = await dispatch(getAllProduct({ limit: 30 }));
       await dispatch(getAWishList());
 
       setProductState(productAction?.payload || null);
@@ -162,7 +162,7 @@ const SingleProduct = () => {
       <BreadCrumb title={productState?.title} />
       <Container className="main-product-wapper home-wapper py-5">
         <div className="row">
-        <div className="col-6">
+        <div className="col-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6">
             <div className="main-product-image">
               <img
                 src={mainImage}
@@ -171,6 +171,7 @@ const SingleProduct = () => {
               />
             </div>
             <Swiper
+              className="other-product-images-swiper"
               modules={[Navigation]}
               spaceBetween={15}
               slidesPerView={4}
@@ -180,19 +181,18 @@ const SingleProduct = () => {
                   slidesPerView: 4,
                 },
                 768: {
-                  slidesPerView: 3,
+                  slidesPerView: 4,
                 },
                 480: {
-                  slidesPerView: 2,
+                  slidesPerView: 4,
                 },
                 0: {
-                  slidesPerView: 1,
+                  slidesPerView: 4,
                 },
-              }}
-              className="other-product-images"
+              }} 
             >
               {productState?.images?.map((item, index) => (
-                <SwiperSlide key={index}>
+                <SwiperSlide key={index} className="swiper-slide">
                   <div
                     className="other-product-image"
                     onClick={() => handleThumbnailClick(item?.url)}
@@ -204,7 +204,7 @@ const SingleProduct = () => {
               ))}
             </Swiper>
           </div>
-          <div className="col-6">
+          <div className="col-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6">
             <div className="main-product-detail">
               <div className="border-bottom">
                 <h3 className="title">

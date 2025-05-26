@@ -8,7 +8,7 @@ const FamousCard = ({ prod }) => {
   return (
     <div className="row">
       {prod.map((product) => (
-        <Link to={`/product/${product._id}`} key={product._id} className="col-3">
+        <Link to={`/product/${product._id}`} key={product._id} className="col-6 col-md-6 col-lg-3 col-xl-3 mb-3">
           <div className="famous-card  position-relative">
             <img
               src={product.images[0]?.url || "images/famous.jpg"}

@@ -5,7 +5,7 @@ const BlogCard = (props) => {
   const columnClasses = `${pathname === "/blogs" ? "col-6" : "col-3"} `;
   const { id, title, description, date, image } = props;
   return (
-    <div className={columnClasses}>
+    <div className={`${columnClasses} blog-full`}>
       <div className="blog-card mb-3" key={id}>
         <div className="card-image w-100">
           <img src={image} className="img-fluid" alt="blog1" />
